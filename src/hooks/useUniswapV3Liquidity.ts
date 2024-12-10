@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { uniswapV3Service } from '../services/uniswapV3';
-import { calculateLiquidity, calculatePrices } from '../utils/uniswapV3';
+import { calculateLiquidity, calculatePrices, calculateTicks } from '../utils/uniswapV3';
 import { CoinGeckoService } from '../services/coingecko';
 
 interface UseUniswapV3LiquidityResult {
@@ -50,14 +50,27 @@ export function useUniswapV3Liquidity(
                     isToken0Base,
                     priceRange
                 );
-                console.log(prices);
+
+                const ticks = calculateTicks(
+                    prices.startSqrtPriceX96,
+                    prices.endSqrtPriceX96,
+                    Number(poolData.tickSpacing)
+                );
+
+                const tickRange = await uniswapV3Service.getTickRange(poolAddress, Number(ticks.startTick), Number(ticks.endTick));
                 
+                const totalLiquidityGross = tickRange.reduce((sum, tick) => {
+                    return sum + tick.liquidityGross;
+                }, 0n);
+
+                console.log(totalLiquidityGross);
+
                 const scaleLiquidity = calculateLiquidity(
-                    poolData.liquidity,
+                    totalLiquidityGross,
                     prices.startSqrtPriceX96,
                     prices.endSqrtPriceX96,
                     isToken0Base
-                );
+                ); 
                 
                 const finalLiquidity = isToken0Base ? 
                     scaleLiquidity / 10**Number(poolData.token1Decimals):
@@ -67,8 +80,8 @@ export function useUniswapV3Liquidity(
                 const backToken = isToken0Base ? poolData.token1 : poolData.token0;
                 const baseTokenPrice = await coinGeckoService.getTokenPrice(backToken);
                 const finalLiquidityUSD = finalLiquidity * baseTokenPrice;
-                console.log(baseTokenPrice);
-                console.log(finalLiquidityUSD);
+
+
                 if (mounted) {
                     setLiquidity(finalLiquidity);
                     setLiquidityUSD(finalLiquidityUSD);

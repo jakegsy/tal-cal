@@ -181,7 +181,7 @@ class UniswapV3Service {
     );
     
     // Get tickSpacing first since we need it for the loop
-    return poolContract.tickSpacing().then((tickSpacing: number) => {
+    return poolContract.tickSpacing().then((tickSpacing: bigint) => {
       const [lowerTick, upperTick] = [
           Math.min(startTick, endTick),
           Math.max(startTick, endTick)

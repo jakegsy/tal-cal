@@ -11,7 +11,7 @@ export function calculateLiquidity(
     isToken0Base: boolean
 ): number {
     const diffSqrtPriceX96 = Math.abs(startSqrtPriceX96 - endSqrtPriceX96);
-    
+    console.log("diffSqrtPriceX96 %s startSqrtPriceX96 %s endSqrtPriceX96 %s", diffSqrtPriceX96, startSqrtPriceX96, endSqrtPriceX96);
     const liquidityValue = isToken0Base
         ? Number(totalLiquidity) * diffSqrtPriceX96 / Q96
         : Number(totalLiquidity) * diffSqrtPriceX96 * Q96 / startSqrtPriceX96 / endSqrtPriceX96;
@@ -24,6 +24,31 @@ export interface PriceCalculationResult {
     targetPrice: number;
     startSqrtPriceX96: number;
     endSqrtPriceX96: number;
+}
+export interface TickCalculationResult {
+    startTick: number;
+    endTick: number;
+}
+
+export function calculateTicks(
+    startSqrtPriceX96: number,
+    endSqrtPriceX96: number, 
+    tickSpacing: number
+): TickCalculationResult {
+    // Convert sqrtPrice to tick index using log base sqrt(1.0001)
+    const logBase = Math.log(1.0001) / 2;
+    
+    // Calculate raw ticks
+    const startTick = Math.floor(Math.log(startSqrtPriceX96 / Q96) / logBase);
+    const endTick = Math.ceil(Math.log(endSqrtPriceX96 / Q96) / logBase);
+    
+    // Round to nearest valid tick based on spacing
+    const startTickRounded = Math.round(startTick / tickSpacing) * tickSpacing;
+    const endTickRounded = Math.round(endTick / tickSpacing) * tickSpacing;
+    return {
+        startTick: startTickRounded,
+        endTick: endTickRounded
+    };
 }
 
 export function calculatePrices(
@@ -44,7 +69,8 @@ export function calculatePrices(
         ? priceBase * (PERCENTAGE_BASE + priceRange) / PERCENTAGE_BASE
         : priceBase * (PERCENTAGE_BASE - priceRange) / PERCENTAGE_BASE;
     
-    
+    console.log((PERCENTAGE_BASE + priceRange) / PERCENTAGE_BASE);
+    console.log((PERCENTAGE_BASE - priceRange) / PERCENTAGE_BASE);
     
         const endSqrtPriceX96 = Math.sqrt(targetPrice * (Q96 * Q96) / decimalScale);
     
