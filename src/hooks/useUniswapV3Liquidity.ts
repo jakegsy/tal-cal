@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { uniswapV3Service } from '../services/uniswapV3';
 import { calculateLiquidity, calculatePrices, calculateTicks } from '../utils/uniswapV3';
-import { CoinGeckoService } from '../services/coingecko';
+import { coinGeckoService } from '../services/coingecko';
 
 interface UseUniswapV3LiquidityResult {
   liquidity: number | null;
@@ -26,7 +26,7 @@ export function useUniswapV3Liquidity(
         setError(null);
 
         async function fetchLiquidity() {
-            if (!poolAddress) {
+            if (!poolAddress || !baseToken) {
                 if (mounted) setLoading(false);
                 return;
             }
@@ -44,6 +44,8 @@ export function useUniswapV3Liquidity(
                 const isToken0Base = baseToken.toLowerCase() === poolData.token0.toLowerCase();
                 
                 const decimalScale = 10**Number(poolData.token1Decimals - poolData.token0Decimals);
+
+
                 const prices = calculatePrices(
                     Number(poolData.sqrtPriceX96),
                     decimalScale,
@@ -57,27 +59,27 @@ export function useUniswapV3Liquidity(
                     Number(poolData.tickSpacing)
                 );
 
-                const tickRange = await uniswapV3Service.getTickRange(
-                    poolAddress, Number(ticks.startTick), Number(ticks.endTick), Number(poolData.tickSpacing));
-                
-                const totalLiquidityGross = tickRange.reduce((sum, tick) => {
-                    return sum + tick.liquidityGross;
-                }, 0n);
+                console.log("startTick: %s endTick: %s", ticks.startTick, ticks.endTick);
+                const totalLiquidityGross = await uniswapV3Service.getLiquidity(
+                    poolAddress,
+                    Number(ticks.startTick),
+                    Number(ticks.endTick),
+                    Number(poolData.tickSpacing)
+                );
 
-                console.log(totalLiquidityGross);
-
-                const scaleLiquidity = calculateLiquidity(
-                    poolData.liquidity,
+                    const scaleLiquidity = calculateLiquidity(
+                    totalLiquidityGross,
                     prices.startSqrtPriceX96,
                     prices.endSqrtPriceX96,
                     isToken0Base
                 ); 
                 
+
+
                 const finalLiquidity = isToken0Base ? 
                     scaleLiquidity / 10**Number(poolData.token1Decimals):
                     scaleLiquidity / 10**Number(poolData.token0Decimals);
                 
-                const coinGeckoService = new CoinGeckoService();
                 const backToken = isToken0Base ? poolData.token1 : poolData.token0;
                 const baseTokenPrice = await coinGeckoService.getTokenPrice(backToken);
                 const finalLiquidityUSD = finalLiquidity * baseTokenPrice;
