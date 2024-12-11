@@ -30,6 +30,11 @@ export interface TickCalculationResult {
     endTick: number;
 }
 
+export type Tick = {
+    tickIdx: number;
+    liquidityNet: bigint;
+  };
+
 export function calculateTicks(
     startSqrtPriceX96: number,
     endSqrtPriceX96: number, 
@@ -58,8 +63,10 @@ export function calculatePrices(
     priceRange: number
 ): PriceCalculationResult {
     const startSqrtPriceX96 = sqrtPriceX96;
+
+    //retrieve start price
     const startPriceX96 = startSqrtPriceX96 * startSqrtPriceX96;
-    
+    //unscale it
     const priceScale1per0 = startPriceX96 / Q96 / Q96;
 
     const priceNorm1per0 = priceScale1per0 * decimalScale;
@@ -72,7 +79,7 @@ export function calculatePrices(
     console.log((PERCENTAGE_BASE + priceRange) / PERCENTAGE_BASE);
     console.log((PERCENTAGE_BASE - priceRange) / PERCENTAGE_BASE);
     
-        const endSqrtPriceX96 = Math.sqrt(targetPrice * (Q96 * Q96) / decimalScale);
+    const endSqrtPriceX96 = Math.sqrt(targetPrice * (Q96 * Q96) / decimalScale);
     
     return {
         priceBase,
@@ -81,3 +88,49 @@ export function calculatePrices(
         endSqrtPriceX96
     };
 } 
+
+
+// Define a minimal Tick type
+
+  
+  /**
+  * Compute active liquidity at a specific stop tick, given an initial tick and liquidity.
+  *
+  * @param ticks - An array of Tick objects, each containing tickIdx and liquidityNet.
+  * @param currentTickIdx - The tick index where you are starting.
+  * @param initialLiquidity - The active liquidity at the currentTickIdx.
+  * @param stopTickIdx - The tick index where the calculation will stop. Whether movingUpward or not stop just above stopTickIdx
+  *
+  * @returns The computed active liquidity at the stopTickIdx.
+  */
+  export function computeActiveLiquidityAtStopTick(
+    ticks: Tick[],
+    currentTickIdx: number,
+    initialLiquidity: bigint,
+    stopTickIdx: number
+  ): bigint{
+    // Sort the tick array by tickIdx for easier traversal
+    const sortedTicks = [...ticks].sort((a, b) => a.tickIdx - b.tickIdx);
+  
+    // Initialize state with given initial liquidity
+    let state = { liquidity: initialLiquidity };
+  
+    // Determine the direction: true if moving upward/rightward/forward, false if moving downward/leftward/backward
+    // upward movement occurs if zeroForOne is false and downward movement ocurrs if zeroForOne is true
+  
+    const movingUpward = stopTickIdx > currentTickIdx;
+  
+    for (const { tickIdx, liquidityNet } of sortedTicks) {
+      // Skip ticks that are not in the path from currentTickIdx to stopTickIdx
+      if (movingUpward && (tickIdx <= currentTickIdx || tickIdx >= stopTickIdx)) continue;
+      if (!movingUpward && (tickIdx >= currentTickIdx || tickIdx < stopTickIdx)) continue;
+  
+      // If the current tick is the stop tick, we've reached the end of the path
+      console.log(liquidityNet);
+      // Update liquidity based on direction
+      // If moving upward, we add liquidityNet. If moving downward, we subtract.
+      state.liquidity += (movingUpward ? 1n : -1n) * liquidityNet;
+    }
+  
+    return state.liquidity;
+  };
