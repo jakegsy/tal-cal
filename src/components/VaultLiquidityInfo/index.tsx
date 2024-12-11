@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { NATIVE_QUOTE_TOKENS } from '../../constants/tokens';
 import { useAllNativeVaultsLiquidity, useVaultLiquidity } from '../../hooks/useNativeVaultLiquidity';
-
+import { isValidEthereumAddress } from '../../utils/validation';
 
 interface VaultLiquidityInfoProps {
   pairToken: string;
@@ -12,14 +12,24 @@ interface VaultLiquidityInfoProps {
 export function VaultLiquidityInfo({ pairToken, showTotalPairableValue, priceRange }: VaultLiquidityInfoProps) {
   if (!showTotalPairableValue) return null;
 
+  const isValidNativeToken = pairToken && 
+    isValidEthereumAddress(pairToken) && 
+    NATIVE_QUOTE_TOKENS.some(token => token.address.toLowerCase() === pairToken.toLowerCase());
+
+  const getValue = () => {
+    if (!pairToken || pairToken.trim() === '') {
+      return <TotalVaultInfo priceRange={priceRange} />;
+    }
+    if (isValidNativeToken) {
+      return <SingleVaultInfo pairToken={pairToken} priceRange={priceRange} />;
+    }
+    return '???';
+  };
+
   return (
-    <div className="mt-2 text-sm text-gray-500 text-right">
-      Total Pairable Value: {
-        pairToken 
-          ? <SingleVaultInfo pairToken={pairToken} priceRange={priceRange} />
-          : <TotalVaultInfo priceRange={priceRange} />
-      }
-    </div>
+    <span className="inline-flex items-center text-sm text-gray-500">
+      Total Pairable Value: {getValue()}
+    </span>
   );
 } 
 

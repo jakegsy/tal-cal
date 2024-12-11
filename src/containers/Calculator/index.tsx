@@ -11,7 +11,7 @@ import {
   DEFAULT_POOL_ADDRESS 
 } from '../../constants/defaults';
 import { TotalLiquidityDisplay } from '../../components/TotalLiquidityDisplay';
-import { TokenInputSection } from '../../components/TokenInput';
+import { AddressInputSection } from '../../components/AddressInput/AddressInputSection';
 
 export function Calculator() {
   const [network, setNetwork] = useState(DEFAULT_NETWORK);
@@ -40,7 +40,7 @@ export function Calculator() {
             </div>
           </div>
           
-          <TokenInputSection
+          <AddressInputSection
             baseToken={baseToken}
             pairToken={pairToken}
             liquidityType={liquidityType}
@@ -77,8 +77,6 @@ export function Calculator() {
           <h2 className="text-xl font-bold mb-4">How it works?</h2>
         </div>
       </div>
-
-
     </div>
   );
 }
