@@ -1,10 +1,11 @@
 import { X } from 'lucide-react';
-import { isValidEthereumAddress } from '../utils/validation';
+import { isValidEthereumAddress } from '../../utils/validation';
+import { ReactNode } from 'react';
 
 const styles = {
   container: 'relative',
   labelContainer: 'flex justify-between items-center mb-2',
-  label: 'block text-sm font-medium text-gray-700',
+  label: 'text-sm font-medium text-gray-700',
   input: {
     base: 'w-full px-4 py-2.5 rounded-lg border focus:outline-none focus:ring-2 pr-8 font-mono text-sm',
     valid: 'border-gray-200 focus:ring-blue-500',
@@ -22,6 +23,7 @@ interface AddressInputProps {
   hideLabel?: boolean;
   error?: string;
   validate?: (address: string) => boolean;
+  badge?: ReactNode;
 }
 
 export function AddressInput({ 
@@ -31,15 +33,24 @@ export function AddressInput({
   label,
   hideLabel = false,
   error,
-  validate
+  validate,
+  badge
 }: AddressInputProps) {
   const isValid = !value || (validate ? validate(value) : isValidEthereumAddress(value));
+  
+  // Only show validation error if address is invalid, otherwise show custom error
+  const displayError = value && !isValid 
+    ? "Please enter a valid Ethereum address"
+    : isValid && error 
+      ? error 
+      : undefined;
 
   return (
     <div className={styles.container}>
       {!hideLabel && label && (
         <div className={styles.labelContainer}>
           <label className={styles.label}>{label}</label>
+          {badge}
         </div>
       )}
       <div className={styles.container}>
@@ -48,7 +59,7 @@ export function AddressInput({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          className={`${styles.input.base} ${isValid ? styles.input.valid : styles.input.invalid}`}
+          className={`${styles.input.base} ${isValid && !error ? styles.input.valid : styles.input.invalid}`}
         />
         {value && (
           <button 
@@ -59,13 +70,10 @@ export function AddressInput({
           </button>
         )}
       </div>
-      {value && !isValid && (
+      {displayError && (
         <p className={styles.errorMessage}>
-          Please enter a valid Ethereum address
+          {displayError}
         </p>
-      )}
-      {error && (
-        <p className={styles.errorMessage}>{error}</p>
       )}
     </div>
   );
