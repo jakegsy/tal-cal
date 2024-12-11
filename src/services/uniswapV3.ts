@@ -118,94 +118,104 @@ class UniswapV3Service {
     const cached = this.getFromCache<PoolData>(cacheKey);
     if (cached) return cached;
 
-    const poolContract = new ethers.Contract(
-      poolAddress,
-      UNISWAP_V3_POOL_ABI,
-      this.provider
-    );
-
-    const [token0, token1, fee, slot0, liquidity, tickSpacing] = await Promise.all([
-      poolContract.token0(),
-      poolContract.token1(),
-      poolContract.fee(),
-      poolContract.slot0(),
-      poolContract.liquidity(),
-      poolContract.tickSpacing()
-    ]);
-
-    // Create ERC20 contracts to get decimals
-    const token0Contract = new ethers.Contract(token0, ['function decimals() view returns (uint8)'], this.provider);
-    const token1Contract = new ethers.Contract(token1, ['function decimals() view returns (uint8)'], this.provider);
-
-    const [token0Decimals, token1Decimals] = await Promise.all([
-      token0Contract.decimals(),
-      token1Contract.decimals()
-    ]);
-
-    const sqrtPriceX96 = slot0[0];
-    const tick = slot0[1];
-
-    // Calculate prices
-    const token0Price = this.getToken0Price(sqrtPriceX96);
-    const token1Price = 1 / token0Price;
-
-    const result = {
-      token0,
-      token1,
-      token0Decimals,
-      token1Decimals,
-      fee,
-      liquidity,
-      sqrtPriceX96,
-      tick,
-      token0Price,
-      token1Price,
-      tickSpacing,
-    };
-
-    this.setCache(cacheKey, result);
-    return result;
-  }
-
-  private getToken0Price(sqrtPriceX96: bigint): number {
-    const Q96 = 2n ** 96n;
-    const price = (sqrtPriceX96 * sqrtPriceX96 * 10n ** 18n) / (Q96 * Q96);
-    return Number(price) / 1e18;
-  }
-
-  async getTickRange(poolAddress: string, startTick: number, endTick: number): Promise<TickData[]> {
-    const poolContract = new ethers.Contract(
+    try {
+      const poolContract = new ethers.Contract(
         poolAddress,
         UNISWAP_V3_POOL_ABI,
         this.provider
-    );
-    
-    // Get tickSpacing first since we need it for the loop
-    return poolContract.tickSpacing().then((tickSpacing: bigint) => {
-      const [lowerTick, upperTick] = [
-          Math.min(startTick, endTick),
-          Math.max(startTick, endTick)
-      ];
-      console.log(`Tick Range: ${lowerTick} to ${upperTick}`);
-
-      // Create array of promises for all tick fetches
-      const tickPromises = [];
-      for (let tick = lowerTick; tick <= upperTick; tick += Number(tickSpacing)) {
-          tickPromises.push(
-              this.getTick(poolAddress, tick)
-                  .then(tickData => tickData.initialized ? tickData : null)
-                  .catch(error => {
-                      console.error(`Error fetching tick ${tick}:`, error);
-                      return null;
-                  })
-          );
-      }
-
-      // Return promise that resolves to filtered array of tick data
-      return Promise.all(tickPromises).then(results => 
-          results.filter((tick): tick is TickData => tick !== null)
       );
-    });
+
+      // Fetch all pool data in parallel
+      const [
+        token0,
+        token1,
+        fee,
+        liquidity,
+        slot0,
+      ] = await Promise.all([
+        poolContract.token0().catch((error: Error) => {
+          throw new Error(`Failed to fetch token0: ${error.message}`);
+        }),
+        poolContract.token1().catch((error: Error) => {
+          throw new Error(`Failed to fetch token1: ${error.message}`);
+        }),
+        poolContract.fee().catch((error: Error) => {
+          throw new Error(`Failed to fetch fee: ${error.message}`);
+        }),
+        poolContract.liquidity().catch((error: Error) => {
+          throw new Error(`Failed to fetch liquidity: ${error.message}`);
+        }),
+        poolContract.slot0().catch((error: Error) => {
+          throw new Error(`Failed to fetch slot0: ${error.message}`);
+        }),
+      ]);
+
+      // Get token decimals
+      const [token0Info, token1Info] = await Promise.all([
+        ethereumService.getTokenInfo(token0).catch((error: Error) => {
+          throw new Error(`Failed to fetch token0 info: ${error.message}`);
+        }),
+        ethereumService.getTokenInfo(token1).catch((error: Error) => {
+          throw new Error(`Failed to fetch token1 info: ${error.message}`);
+        }),
+      ]);
+
+      const [sqrtPriceX96, tick] = slot0;
+      
+      // Calculate prices
+      const token0Price = this.calculatePrice(sqrtPriceX96, Number(token0Info.decimals),   Number(token1Info.decimals));
+      const token1Price = 1 / token0Price;
+
+      const poolData: PoolData = {
+        token0,
+        token1,
+        token0Decimals: Number(token0Info.decimals),
+        token1Decimals: Number(token1Info.decimals),
+        fee,
+        liquidity,
+        sqrtPriceX96,
+        tick,
+        token0Price,
+        token1Price,
+        tickSpacing: await poolContract.tickSpacing(),
+      };
+
+      this.setCache(cacheKey, poolData);
+      return poolData;
+    } catch (error) {
+      console.error(`Failed to fetch pool data for ${poolAddress}:`, error);
+      throw error instanceof Error ? error : new Error(`Unknown error fetching pool data for ${poolAddress}`);
+    }
+  }
+
+  private calculatePrice(sqrtPriceX96: bigint, decimals0: number, decimals1: number): number {
+    const price = Number(sqrtPriceX96) / 2**96;
+    const adjustedPrice = price * price * (10 ** (decimals0 - decimals1));
+    return adjustedPrice;
+  }
+
+  async getTickRange(poolAddress: string, startTick: number, endTick: number, tickSpacing: number): Promise<TickData[]> {
+    const [lowerTick, upperTick] = [
+        Math.min(startTick, endTick),
+        Math.max(startTick, endTick)
+    ];
+    console.log(`Tick Range: ${lowerTick} to ${upperTick}`);
+
+    const tickPromises = [];
+    for (let tick = lowerTick; tick <= upperTick; tick += tickSpacing) {
+        tickPromises.push(
+            this.getTick(poolAddress, tick)
+                .then(tickData => tickData.initialized ? tickData : null)
+                .catch(error => {
+                    console.error(`Error fetching tick ${tick}:`, error);
+                    return null;
+                })
+        );
+    }
+
+    return Promise.all(tickPromises).then(results => 
+        results.filter((tick): tick is TickData => tick !== null)
+    );
   }
 }
 

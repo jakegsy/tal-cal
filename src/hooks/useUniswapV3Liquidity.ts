@@ -57,7 +57,8 @@ export function useUniswapV3Liquidity(
                     Number(poolData.tickSpacing)
                 );
 
-                const tickRange = await uniswapV3Service.getTickRange(poolAddress, Number(ticks.startTick), Number(ticks.endTick));
+                const tickRange = await uniswapV3Service.getTickRange(
+                    poolAddress, Number(ticks.startTick), Number(ticks.endTick), Number(poolData.tickSpacing));
                 
                 const totalLiquidityGross = tickRange.reduce((sum, tick) => {
                     return sum + tick.liquidityGross;
@@ -66,7 +67,7 @@ export function useUniswapV3Liquidity(
                 console.log(totalLiquidityGross);
 
                 const scaleLiquidity = calculateLiquidity(
-                    totalLiquidityGross,
+                    poolData.liquidity,
                     prices.startSqrtPriceX96,
                     prices.endSqrtPriceX96,
                     isToken0Base

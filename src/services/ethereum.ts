@@ -8,7 +8,6 @@ export interface TokenInfo {
   name: string;
   symbol: string;
   decimals: number;
-  totalSupply?: string;
 }
 
 class EthereumService {
@@ -17,8 +16,9 @@ class EthereumService {
 
   constructor() {
     const rpcUrl = import.meta.env.VITE_ETHEREUM_RPC_URL || DEFAULT_RPC_URL;
-    this.provider = new ethers.JsonRpcProvider(rpcUrl);
+    this.provider = new ethers.JsonRpcProvider(DEFAULT_RPC_URL);
     this.tokenCache = new Map();
+    console.log(`Ethereum service initialized with RPC URL: ${rpcUrl}`);
   }
 
   async getTokenInfo(tokenAddress: string): Promise<TokenInfo> {
@@ -27,30 +27,37 @@ class EthereumService {
       const cached = this.tokenCache.get(tokenAddress.toLowerCase());
       if (cached) return cached;
 
-      // Verify it's a contract first
-      const isContract = await this.isContract(tokenAddress);
-      if (!isContract) {
-        throw new Error('Address is not a contract');
-      }
+      // // Verify it's a contract first
+      // const isContract = await this.isContract(tokenAddress);
+      // if (!isContract) {
+      //   throw new Error(`Address ${tokenAddress} is not a contract`);
+      // }
 
       const contract = new ethers.Contract(tokenAddress, ERC20_ABI, this.provider);
-      
+
       // Use Promise.allSettled to handle potential failures gracefully
-      const [nameResult, symbolResult, decimalsResult, totalSupplyResult] = await Promise.allSettled([
+      const [nameResult, symbolResult, decimalsResult] = await Promise.allSettled([
         contract.name(),
         contract.symbol(),
-        contract.decimals(),
-        contract.totalSupply()
+        contract.decimals()
       ]);
+
+      // Validate each result and throw appropriate errors
+      if (nameResult.status === 'rejected') {
+        throw new Error(`Failed to get token name: ${nameResult.reason}`);
+      }
+      if (symbolResult.status === 'rejected') {
+        throw new Error(`Failed to get token symbol: ${symbolResult.reason}`);
+      }
+      if (decimalsResult.status === 'rejected') {
+        throw new Error(`Failed to get token decimals: ${decimalsResult.reason}`);
+      }
 
       const tokenInfo: TokenInfo = {
         address: tokenAddress,
-        name: nameResult.status === 'fulfilled' ? nameResult.value : 'Unknown Token',
-        symbol: symbolResult.status === 'fulfilled' ? symbolResult.value : '???',
-        decimals: decimalsResult.status === 'fulfilled' ? decimalsResult.value : 18,
-        totalSupply: totalSupplyResult.status === 'fulfilled' 
-          ? ethers.formatUnits(totalSupplyResult.value, decimalsResult.status === 'fulfilled' ? decimalsResult.value : 18)
-          : undefined
+        name: nameResult.value,
+        symbol: symbolResult.value,
+        decimals: decimalsResult.value
       };
 
       // Cache the result
@@ -58,8 +65,8 @@ class EthereumService {
       
       return tokenInfo;
     } catch (error) {
-      console.error('Error fetching token info:', error);
-      throw error;
+      console.error(`Error fetching token info for ${tokenAddress}:`, error);
+      throw error instanceof Error ? error : new Error(`Unknown error fetching token info for ${tokenAddress}`);
     }
   }
 
