@@ -1,6 +1,7 @@
 import { ethers } from 'ethers';
 import { UNISWAP_V3_POOL_ABI } from '../contracts/uniswapV3';
 import { ethereumService } from './ethereum';
+import { Tick, computeActiveLiquidityAtStopTick } from '../utils/uniswapV3';
 
 export interface PoolState {
   liquidity: bigint;
@@ -27,19 +28,13 @@ export interface PoolData {
   tickSpacing: number;
 }
 
-// Add new interface for tick data
+// Use simplified Tick interface for tick data
 export interface TickData {
-    liquidityGross: bigint;
+    tickIdx: number;
     liquidityNet: bigint;
-    feeGrowthOutside0X128: bigint;
-    feeGrowthOutside1X128: bigint;
-    tickCumulativeOutside: bigint;
-    secondsPerLiquidityOutsideX128: bigint;
-    secondsOutside: number;
     initialized: boolean;
 }
 
-// Add cache interface and helper
 interface CacheEntry<T> {
   data: T;
   timestamp: number;
@@ -82,7 +77,7 @@ class UniswapV3Service {
     };
   }
 
-  async getTick(poolAddress: string, tick: number): Promise<TickData> {
+  async getTick(poolAddress: string, tick: number): Promise<Tick> {
     const cacheKey = this.getCacheKey('getTick', poolAddress, tick);
     const cached = this.getFromCache<TickData>(cacheKey);
     if (cached) return cached;
@@ -95,15 +90,9 @@ class UniswapV3Service {
 
     // Return the promise directly without awaiting
     const tickPromise = poolContract.ticks(tick).then(([liquidityGross, liquidityNet, feeGrowthOutside0X128, feeGrowthOutside1X128, tickCumulativeOutside, secondsPerLiquidityOutsideX128, secondsOutside, initialized]) => {
-      const result = {
-        liquidityGross,
+      const result: Tick = {
+        tickIdx: tick,
         liquidityNet,
-        feeGrowthOutside0X128,
-        feeGrowthOutside1X128,
-        tickCumulativeOutside,
-        secondsPerLiquidityOutsideX128,
-        secondsOutside,
-        initialized
       };
 
       this.setCache(cacheKey, result);
@@ -193,8 +182,13 @@ class UniswapV3Service {
     const adjustedPrice = price * price * (10 ** (decimals0 - decimals1));
     return adjustedPrice;
   }
+  async getLiquidity(poolAddress: string, startTick: number, endTick: number, tickSpacing: number): Promise<bigint> {
+    const ticks = await this.getTickRange(poolAddress, startTick, endTick, tickSpacing);
+    const totalLiquidity = computeActiveLiquidityAtStopTick(ticks, startTick, 0n, endTick);
+    return totalLiquidity;
+  }
 
-  async getTickRange(poolAddress: string, startTick: number, endTick: number, tickSpacing: number): Promise<TickData[]> {
+  async getTickRange(poolAddress: string, startTick: number, endTick: number, tickSpacing: number): Promise<Tick[]> {
     const [lowerTick, upperTick] = [
         Math.min(startTick, endTick),
         Math.max(startTick, endTick)
@@ -205,7 +199,7 @@ class UniswapV3Service {
     for (let tick = lowerTick; tick <= upperTick; tick += tickSpacing) {
         tickPromises.push(
             this.getTick(poolAddress, tick)
-                .then(tickData => tickData.initialized ? tickData : null)
+                .then(tickData => tickData)
                 .catch(error => {
                     console.error(`Error fetching tick ${tick}:`, error);
                     return null;
@@ -214,7 +208,7 @@ class UniswapV3Service {
     }
 
     return Promise.all(tickPromises).then(results => 
-        results.filter((tick): tick is TickData => tick !== null)
+        results.filter((tick): tick is Tick => tick !== null)
     );
   }
 }
