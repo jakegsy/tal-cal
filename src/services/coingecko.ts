@@ -39,3 +39,5 @@ export class CoinGeckoService {
     }
   }
 } 
+
+export const coinGeckoService = new CoinGeckoService();
