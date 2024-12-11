@@ -1,6 +1,8 @@
 import { ethers } from 'ethers';
 import { ERC20_ABI } from '../contracts/erc20';
 
+const DEFAULT_RPC_URL = 'https://eth.llamarpc.com';
+
 export interface TokenInfo {
   address: string;
   name: string;
@@ -14,7 +16,8 @@ class EthereumService {
   private tokenCache: Map<string, TokenInfo>;
 
   constructor() {
-    this.provider = new ethers.JsonRpcProvider('https://eth.llamarpc.com');
+    const rpcUrl = import.meta.env.VITE_ETHEREUM_RPC_URL || DEFAULT_RPC_URL;
+    this.provider = new ethers.JsonRpcProvider(rpcUrl);
     this.tokenCache = new Map();
   }
 
