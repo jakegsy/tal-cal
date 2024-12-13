@@ -59,7 +59,7 @@ export function useUniswapV3Liquidity(
                     Number(poolData.tickSpacing)
                 );
 
-                console.log("startTick: %s endTick: %s", ticks.startTick, ticks.endTick);
+                //console.log("startTick: %s endTick: %s", ticks.startTick, ticks.endTick);
                 const totalLiquidityGross = await uniswapV3Service.getLiquidity(
                     poolAddress,
                     Number(ticks.startTick),
@@ -68,7 +68,7 @@ export function useUniswapV3Liquidity(
                 );
 
                     const scaleLiquidity = calculateLiquidity(
-                    totalLiquidityGross,
+                    poolData.liquidity,
                     prices.startSqrtPriceX96,
                     prices.endSqrtPriceX96,
                     isToken0Base
