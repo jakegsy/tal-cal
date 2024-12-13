@@ -1,7 +1,6 @@
 import { useUniswapV3Pool } from '../../hooks/useUniswapV3Pool';
 import { useUniswapV3Liquidity } from '../../hooks/useUniswapV3Liquidity';
 import { parsePriceRangePercent } from '../../utils/orderbook';
-import { PoolInfoDisplay } from '../PoolInfoDisplay';
 
 // New wrapper component to handle the conditional logic
 export function UniswapV3LiquidityDisplay({ 
@@ -28,7 +27,6 @@ export function SingleUniswapV3Info({
     baseToken: string; 
     priceRange: string 
 }) {
-    const { poolInfo, loading: poolVerificationLoading, error: poolError } = useUniswapV3Pool(poolAddress);
     const { 
         liquidityUSD: poolLiquidity, 
         loading: liquidityLoading, 
@@ -39,7 +37,7 @@ export function SingleUniswapV3Info({
         parsePriceRangePercent(priceRange)
     );
     
-    const loading = poolVerificationLoading || liquidityLoading;
+    const loading = liquidityLoading;
 
     if (loading) {
         return (
@@ -51,10 +49,6 @@ export function SingleUniswapV3Info({
         );
     }
 
-    if (poolError) {
-        return <span className="text-red-500">Invalid pool</span>;
-    }
-
     if (liquidityError) {
         return <span className="text-red-500">{liquidityError.message}</span>;
     }
@@ -64,21 +58,18 @@ export function SingleUniswapV3Info({
     }
 
     return (
-        <div>
-            <span>
-                ${poolLiquidity.toLocaleString(undefined, { 
-                    minimumFractionDigits: 2, 
-                    maximumFractionDigits: 2 
-                })}
-            </span>
-            <PoolInfoDisplay poolAddress={poolAddress} />
-        </div>
+        <span className="inline-block">
+            ${poolLiquidity.toLocaleString(undefined, { 
+                minimumFractionDigits: 2, 
+                maximumFractionDigits: 2 
+            })}
+        </span>
     );
 }
 
 export function EmptyUniswapV3Info() {
     return (
-        <span className="text-gray-500">
+        <span className="inline-block text-gray-500">
             Select a pool to view liquidity
         </span>
     );

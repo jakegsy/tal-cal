@@ -63,14 +63,6 @@ export function Calculator() {
             pairToken={pairToken}
             priceRange={priceRange}
           />
-          <div className="flex gap-2">
-            <button className="px-4 py-2 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50">
-              View Pool
-            </button>
-            <button className="px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600">
-              Add Liquidity
-            </button>
-          </div>
         </div>
 
         <div>

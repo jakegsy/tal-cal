@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { NATIVE_QUOTE_TOKENS } from '../../constants/tokens';
 import { useAllNativeVaultsLiquidity, useVaultLiquidity } from '../../hooks/useNativeVaultLiquidity';
 import { isValidEthereumAddress } from '../../utils/validation';
+import { ExternalLink } from 'lucide-react';
 
 interface VaultLiquidityInfoProps {
   pairToken: string;
@@ -27,14 +28,19 @@ export function VaultLiquidityInfo({ pairToken, showTotalPairableValue, priceRan
   };
 
   return (
-    <span className="inline-flex items-center text-sm text-gray-500">
-      Total Pairable Value: {getValue()}
-    </span>
+    <div className="flex flex-col gap-2">
+      <span className="inline-block">
+        Total Pairable Value: {getValue()}
+      </span>
+    </div>
   );
 } 
 
 // New component for single vault info
-export function SingleVaultInfo({ pairToken, priceRange }: { pairToken: string; priceRange: number }) {
+export function SingleVaultInfo({ pairToken, priceRange }: { 
+    pairToken: string; 
+    priceRange: number;
+}) {
     const selectedVault = useMemo(() => {
       if (!pairToken) return undefined;
       return NATIVE_QUOTE_TOKENS.find(
@@ -45,29 +51,34 @@ export function SingleVaultInfo({ pairToken, priceRange }: { pairToken: string; 
     
     if (selectedVaultLoading) {
         return (
-            <div className="inline-block animate-pulse">
+            <span className="inline-block animate-pulse">
                 <div className="h-6 w-32 bg-gray-200 rounded"></div>
-            </div>
+            </span>
         );
     }
-    return <div>
-      ${selectedVaultCash?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) ?? '???'}
-    </div>;
-  } 
 
-  // New component for total vaults info
+    return (
+        <span className="inline-block">
+            ${selectedVaultCash?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) ?? '???'}
+        </span>
+    );
+} 
+
+// New component for total vaults info
 export function TotalVaultInfo({ priceRange }: { priceRange: number }) {
     const { totalCashInUSD, loading: vaultsLoading } = useAllNativeVaultsLiquidity();
   
     if (vaultsLoading) {
         return (
-            <div className="inline-block animate-pulse">
+            <span className="inline-block animate-pulse">
                 <div className="h-6 w-32 bg-gray-200 rounded"></div>
-            </div>
+            </span>
         );
     }
     
-    return <div>
-      ${totalCashInUSD.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-    </div>;
-  } 
+    return (
+        <span className="inline-block">
+            ${totalCashInUSD.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        </span>
+    );
+}
