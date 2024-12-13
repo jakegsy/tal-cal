@@ -1,6 +1,7 @@
 import { useUniswapV3Pool } from '../../hooks/useUniswapV3Pool';
 import { useUniswapV3Liquidity } from '../../hooks/useUniswapV3Liquidity';
 import { parsePriceRangePercent } from '../../utils/orderbook';
+import { PoolInfoDisplay } from '../PoolInfoDisplay';
 
 // New wrapper component to handle the conditional logic
 export function UniswapV3LiquidityDisplay({ 
@@ -42,9 +43,11 @@ export function SingleUniswapV3Info({
 
     if (loading) {
         return (
-            <span className="text-gray-500">
-                Loading...
-            </span>
+            <div>
+                <span className="text-gray-500">
+                    Loading...
+                </span>
+            </div>
         );
     }
 
@@ -61,12 +64,15 @@ export function SingleUniswapV3Info({
     }
 
     return (
-        <span>
-            ${poolLiquidity.toLocaleString(undefined, { 
-                minimumFractionDigits: 2, 
-                maximumFractionDigits: 2 
-            })}
-        </span>
+        <div>
+            <span>
+                ${poolLiquidity.toLocaleString(undefined, { 
+                    minimumFractionDigits: 2, 
+                    maximumFractionDigits: 2 
+                })}
+            </span>
+            <PoolInfoDisplay poolAddress={poolAddress} />
+        </div>
     );
 }
 
@@ -77,4 +83,3 @@ export function EmptyUniswapV3Info() {
         </span>
     );
 }
-

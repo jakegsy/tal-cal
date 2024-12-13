@@ -20,7 +20,15 @@ class EthereumService {
     this.tokenCache = new Map();
     console.log(`Ethereum service initialized with RPC URL: ${rpcUrl}`);
   }
-
+  async getTokenBalance(tokenAddress: string, holderAddress: string): Promise<bigint> {
+    try {
+      const contract = new ethers.Contract(tokenAddress, ERC20_ABI, this.provider);
+      return await contract.balanceOf(holderAddress);
+    } catch (error) {
+      console.error(`Error fetching token balance for ${tokenAddress} of holder ${holderAddress}:`, error);
+      throw error instanceof Error ? error : new Error(`Unknown error fetching token balance`);
+    }
+  }
   async getTokenInfo(tokenAddress: string): Promise<TokenInfo> {
     try {
       // Check cache first

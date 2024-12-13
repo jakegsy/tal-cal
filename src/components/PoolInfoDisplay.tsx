@@ -3,6 +3,9 @@ import { useUniswapV3PoolData } from '../hooks/useUniswapV3PoolData';
 import { useTokenInfo } from '../hooks/useTokenInfo';
 import { formatCurrency } from '../utils/format';
 import { ExternalLink } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { ethereumService } from '../services/ethereum';
+import { coinGeckoService } from '../services/coingecko';
 
 interface PoolInfoDisplayProps {
   poolAddress: string;
@@ -13,8 +16,51 @@ export function PoolInfoDisplay({ poolAddress }: PoolInfoDisplayProps) {
   const { poolData, loading: dataLoading } = useUniswapV3PoolData(poolAddress);
   const { tokenInfo: token0Info } = useTokenInfo(poolInfo?.token0);
   const { tokenInfo: token1Info } = useTokenInfo(poolInfo?.token1);
+  const [token0Balance, setToken0Balance] = useState<bigint | null>(null);
+  const [token1Balance, setToken1Balance] = useState<bigint | null>(null);
+  const [token0Price, setToken0Price] = useState<number | null>(null);
+  const [token1Price, setToken1Price] = useState<number | null>(null);
 
-  if (poolLoading || dataLoading || !poolInfo || !poolData || !token0Info || !token1Info) {
+  useEffect(() => {
+    async function fetchBalances() {
+      if (!poolInfo?.token0 || !poolInfo?.token1 || !poolAddress) return;
+      
+      try {
+        const [balance0, balance1] = await Promise.all([
+          ethereumService.getTokenBalance(poolInfo.token0, poolAddress),
+          ethereumService.getTokenBalance(poolInfo.token1, poolAddress)
+        ]);
+        setToken0Balance(balance0);
+        setToken1Balance(balance1);
+      } catch (error) {
+        console.error('Error fetching token balances:', error);
+      }
+    }
+
+    fetchBalances();
+  }, [poolAddress, poolInfo?.token0, poolInfo?.token1]);
+
+  useEffect(() => {
+    async function fetchPrices() {
+      if (!poolInfo?.token0 || !poolInfo?.token1) return;
+      
+      try {
+        const [price0, price1] = await Promise.all([
+          coinGeckoService.getTokenPrice(poolInfo.token0),
+          coinGeckoService.getTokenPrice(poolInfo.token1)
+        ]);
+        setToken0Price(price0);
+        setToken1Price(price1);
+      } catch (error) {
+        console.error('Error fetching token prices:', error);
+      }
+    }
+
+    fetchPrices();
+  }, [poolInfo?.token0, poolInfo?.token1]);
+
+  if (poolLoading || dataLoading || !poolInfo || !poolData || !token0Info || !token1Info || 
+      token0Balance === null || token1Balance === null || token0Price === null || token1Price === null) {
     return (
       <div className="mt-6 bg-gray-50 rounded-lg p-6 animate-pulse">
         <div className="h-4 bg-gray-200 rounded w-1/3 mb-4"></div>
@@ -27,14 +73,14 @@ export function PoolInfoDisplay({ poolAddress }: PoolInfoDisplayProps) {
     );
   }
 
-  const poolName = `Uniswap V3 ${token0Info.symbol}-${token1Info.symbol} ${(poolInfo.fee / 10000).toFixed(3)}%`;
+  const poolName = `Uniswap V3 ${token0Info.symbol}-${token1Info.symbol} ${(Number(poolInfo.fee) / 10000).toFixed(3)}%`;
   
-  // Calculate token amounts based on liquidity and current price
-  const token0Amount = Number(poolData.liquidity) * Math.sqrt(poolData.token0Price);
-  const token1Amount = Number(poolData.liquidity) * Math.sqrt(poolData.token1Price);
+  // Convert token balances to display format
+  const token0Amount = Number(token0Balance) / Math.pow(10, Number(token0Info.decimals));
+  const token1Amount = Number(token1Balance) / Math.pow(10, Number(token1Info.decimals));
   
-  // Estimate TVL (this is a simplified calculation)
-  const tvlUsd = (token0Amount * poolData.token0Price) + token1Amount;
+  // Calculate TVL using CoinGecko prices
+  const tvlUsd = (token0Amount * token0Price) + (token1Amount * token1Price);
 
   const handleViewPool = () => {
     window.open(`https://app.uniswap.org/explore/pools/ethereum/${poolAddress}`, '_blank');

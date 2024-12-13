@@ -1,5 +1,4 @@
 import { PoolData } from "../services/uniswapV3";
-
 const Q96 = Math.pow(2, 96);
 const PERCENTAGE_BASE = 100;
 
