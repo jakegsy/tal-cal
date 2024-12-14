@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { NetworkSelect } from '../../components/NetworkSelect';
 import { LiquidityTypeSelect } from '../../components/LiquidityTypeSelect';
 import { PriceRangeSelector } from '../../components/PriceRangeSelector';
-import { RecordsList } from '../RecordsList';
+import { RecordList } from '../../components/RecordList';
 import { 
   DEFAULT_NETWORK, 
   DEFAULT_LIQUIDITY_TYPE, 
@@ -10,8 +10,18 @@ import {
   DEFAULT_BASE_TOKEN,
   DEFAULT_POOL_ADDRESS 
 } from '../../constants/defaults';
-import { TotalLiquidityDisplay } from '../../components/TotalLiquidityDisplay';
+import { TotalLiquidityDisplay } from '../../components/LiquidityInfo/TotalLiquidityInfo';
 import { AddressInputSection } from '../../components/AddressInput/AddressInputSection';
+
+interface Record {
+  tokenName: string;
+  network: string;
+  amount: string;
+  liquidityType: string;
+  priceRange: string;
+  pairInfo?: string;
+  address?: string;
+}
 
 export function Calculator() {
   const [network, setNetwork] = useState(DEFAULT_NETWORK);
@@ -21,6 +31,33 @@ export function Calculator() {
     DEFAULT_LIQUIDITY_TYPE === 'uniswap_v3' ? DEFAULT_POOL_ADDRESS : ''
   );
   const [priceRange, setPriceRange] = useState(DEFAULT_PRICE_RANGE);
+  const [records, setRecords] = useState<Record[]>([]);
+
+  const addRecord = (liquidityValue: string) => {
+    const newRecord: Record = {
+      tokenName: baseToken || "ETH",
+      network: network,
+      amount: liquidityValue,
+      liquidityType: liquidityType === 'uniswap_v3' ? 'Uniswap V3 AMM' : 'Native',
+      priceRange: `${priceRange}`,
+      pairInfo: pairToken ? `Paired with ${pairToken}` : undefined,
+      address: liquidityType === 'uniswap_v3' ? pairToken : undefined
+    };
+    
+    setRecords(prev => {
+      // Check if record already exists
+      const exists = prev.some(r => 
+        r.tokenName === newRecord.tokenName && 
+        r.address === newRecord.address &&
+        r.liquidityType === newRecord.liquidityType
+      );
+      
+      if (!exists) {
+        return [...prev, newRecord];
+      }
+      return prev;
+    });
+  };
 
   return (
     <div className="flex min-h-screen">
@@ -62,12 +99,17 @@ export function Calculator() {
             baseToken={baseToken}
             pairToken={pairToken}
             priceRange={priceRange}
+            onLiquidityCalculated={addRecord}
           />
         </div>
 
         <div>
           <h2 className="text-xl font-bold mb-4">How it works?</h2>
         </div>
+      </div>
+      
+      <div className="flex-1 p-8">
+        <RecordList records={records} />
       </div>
     </div>
   );

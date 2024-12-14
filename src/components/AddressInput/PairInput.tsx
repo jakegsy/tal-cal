@@ -3,7 +3,7 @@ import { AddressInput } from './AddressInput';
 import { NATIVE_QUOTE_TOKENS } from '../../constants/tokens';
 import { isValidEthereumAddress } from '../../utils/validation';
 import { NativeLiquidityTokens } from '../NativeLiquidityTokens';
-import { VaultLiquidityInfo } from '../VaultLiquidityInfo';
+import { VaultLiquidityInfo } from '../LiquidityInfo/NativeVaultLiquidityInfo';
 
 const styles = {
   badge: 'text-sm font-medium text-gray-500',
