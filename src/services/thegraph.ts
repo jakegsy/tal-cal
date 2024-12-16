@@ -9,7 +9,7 @@ const getApiKey = () => {
   if (apiKey) {
       return apiKey;
     
-  
+  }
 
   throw new Error('VITE_THEGRAPH_API_KEY environment variable is required');
 };
