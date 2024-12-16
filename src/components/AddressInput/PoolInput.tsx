@@ -1,10 +1,7 @@
-import { useUniswapV3Pool } from '../../hooks/useUniswapV3Pool';
+import { usePoolData } from '../../hooks/useUniswapV3';
 import { AddressInput } from './AddressInput';
 import { PoolPairInfo } from '../PoolPairInfo';
-
-const styles = {
-  badge: 'text-sm font-medium text-gray-500'
-};
+import { isValidEthereumAddress } from '../../utils/validation';
 
 interface PoolInputProps {
   value: string;
@@ -19,13 +16,22 @@ export function PoolInput({
   label = "Pool",
   hideLabel = false
 }: PoolInputProps) {
-  const { poolData, loading } = useUniswapV3Pool(value || undefined);
+  const shouldFetchPool = value && isValidEthereumAddress(value);
+  const { data: poolData, isLoading } = usePoolData(shouldFetchPool ? value : undefined);
 
-  const badge = loading 
-    ? <span className={styles.badge}>Loading...</span>
-    : value 
-      ? <PoolPairInfo poolAddress={value} />
-      : null;
+  const validatePool = (address: string) => {
+    return isValidEthereumAddress(address);
+  };
+
+  const badge = value ? (
+    <div className="flex items-center">
+      {isLoading ? (
+        <span className="text-sm font-medium text-gray-500">Loading...</span>
+      ) : poolData ? (
+        <PoolPairInfo poolAddress={value} />
+      ) : null}
+    </div>
+  ) : null;
 
   return (
     <div>
@@ -36,6 +42,7 @@ export function PoolInput({
         badge={badge}
         hideLabel={hideLabel}
         placeholder="Enter pool address"
+        validate={validatePool}
       />
     </div>
   );

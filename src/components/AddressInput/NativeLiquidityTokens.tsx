@@ -1,5 +1,5 @@
 import { Circle } from 'lucide-react';
-import { NATIVE_QUOTE_TOKENS } from '../constants/tokens';
+import { NATIVE_QUOTE_TOKENS } from '../../constants/tokens';
 
 interface NativeLiquidityTokensProps {
   onSelect?: (address: string) => void;

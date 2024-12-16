@@ -1,6 +1,6 @@
 import { X } from 'lucide-react';
 import { isValidEthereumAddress } from '../../utils/validation';
-import { ReactNode } from 'react';
+import { ReactNode, useState } from 'react';
 
 const styles = {
   container: 'relative',
@@ -36,44 +36,45 @@ export function AddressInput({
   validate,
   badge
 }: AddressInputProps) {
-  const isValid = !value || (validate ? validate(value) : isValidEthereumAddress(value));
+  const isValidInput = !value || (validate ? validate(value) : isValidEthereumAddress(value));
   
-  // Only show validation error if address is invalid, otherwise show custom error
-  const displayError = value && !isValid 
+  const errorMessage = value && !isValidInput 
     ? "Please enter a valid Ethereum address"
-    : isValid && error 
+    : isValidInput && error 
       ? error 
       : undefined;
 
   return (
     <div className={styles.container}>
-      {!hideLabel && label && (
-        <div className={styles.labelContainer}>
-          <label className={styles.label}>{label}</label>
-          {badge}
-        </div>
-      )}
-      <div className={styles.container}>
-        <input
-          type="text"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder}
-          className={`${styles.input.base} ${isValid && !error ? styles.input.valid : styles.input.invalid}`}
-        />
-        {value && (
-          <button 
-            onClick={() => onChange('')}
-            className={styles.clearButton}
-          >
-            <X className="w-4 h-4" />
-          </button>
-        )}
+      <div className={styles.labelContainer}>
+        <span className={styles.label}>{!hideLabel && label}</span>
+        {badge}
       </div>
-      {displayError && (
-        <p className={styles.errorMessage}>
-          {displayError}
-        </p>
+      
+      <div className="relative">
+        <div className="relative flex">
+          <input
+            type="text"
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={placeholder}
+            className={`${styles.input.base} ${
+              errorMessage ? styles.input.invalid : styles.input.valid
+            }`}
+          />
+          {value && (
+            <button
+              onClick={() => onChange('')}
+              className={styles.clearButton}
+            >
+              <X size={16} />
+            </button>
+          )}
+        </div>
+      </div>
+
+      {errorMessage && (
+        <p className={styles.errorMessage}>{errorMessage}</p>
       )}
     </div>
   );

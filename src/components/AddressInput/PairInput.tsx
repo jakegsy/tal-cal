@@ -1,8 +1,7 @@
 import { useMemo } from 'react';
 import { AddressInput } from './AddressInput';
-import { NATIVE_QUOTE_TOKENS } from '../../constants/tokens';
 import { isValidEthereumAddress } from '../../utils/validation';
-import { NativeLiquidityTokens } from '../NativeLiquidityTokens';
+import { NativeLiquidityTokens } from './NativeLiquidityTokens';
 import { VaultLiquidityInfo } from '../LiquidityInfo/NativeVaultLiquidityInfo';
 
 const styles = {
@@ -26,34 +25,19 @@ export function PairInput({
   priceRange = 0.1
 }: PairInputProps) {
   const validateToken = (address: string) => {
-    return NATIVE_QUOTE_TOKENS.some(
-      token => token.address.toLowerCase() === address.toLowerCase()
-    );
+    return isValidEthereumAddress(address);
   };
-
-  const error = value && isValidEthereumAddress(value) && !validateToken(value)
-    ? "Only USDC, USDT, WETH, and WBTC are supported for Native Liquidity"
-    : undefined;
 
   const badge = useMemo(() => {
     if (!value || !isValidEthereumAddress(value)) {
       return <NativeLiquidityTokens onSelect={onChange} />;
     }
     
-    const nativeToken = NATIVE_QUOTE_TOKENS.find(
-      token => token.address.toLowerCase() === value.toLowerCase()
+    return (
+      <div className="flex items-center gap-4">
+        <NativeLiquidityTokens onSelect={onChange} />
+      </div>
     );
-    
-    if (nativeToken) {
-      return (
-        <div className="flex items-center gap-4">
-          <span className={styles.badge}>{`${nativeToken.name} (${nativeToken.symbol})`}</span>
-          <NativeLiquidityTokens onSelect={onChange} />
-        </div>
-      );
-    }
-    
-    return <NativeLiquidityTokens onSelect={onChange} />;
   }, [value, onChange]);
 
   return (
@@ -67,7 +51,6 @@ export function PairInput({
           hideLabel={hideLabel}
           placeholder="Enter pair token address"
           validate={validateToken}
-          error={error}
         />
         <div className="flex justify-end">
           <VaultLiquidityInfo 

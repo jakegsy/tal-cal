@@ -54,7 +54,7 @@ export function SingleVaultInfo({
     const { cashInUSD: selectedVaultCash, loading: selectedVaultLoading } = useVaultLiquidity(selectedVault ?? '');
     
     useEffect(() => {
-        if (!selectedVaultLoading && selectedVaultCash !== undefined) {
+        if (!selectedVaultLoading && selectedVaultCash !== undefined && selectedVaultCash !== null) {
             const formattedValue = selectedVaultCash.toLocaleString(undefined, { 
                 minimumFractionDigits: 2, 
                 maximumFractionDigits: 2 
@@ -71,9 +71,17 @@ export function SingleVaultInfo({
         );
     }
 
+    if (selectedVaultCash === undefined || selectedVaultCash === null) {
+        return (
+            <span className="inline-block text-gray-500">
+                No data available
+            </span>
+        );
+    }
+
     return (
         <span className="inline-block">
-            ${selectedVaultCash?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) ?? '???'}
+            ${selectedVaultCash.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
         </span>
     );
 }
@@ -89,7 +97,7 @@ export function TotalVaultInfo({
     const { totalCashInUSD, loading: vaultsLoading } = useAllNativeVaultsLiquidity();
   
     useEffect(() => {
-        if (!vaultsLoading && totalCashInUSD !== undefined) {
+        if (!vaultsLoading && totalCashInUSD !== undefined && totalCashInUSD !== null) {
             const formattedValue = totalCashInUSD.toLocaleString(undefined, { 
                 minimumFractionDigits: 2, 
                 maximumFractionDigits: 2 
@@ -102,6 +110,14 @@ export function TotalVaultInfo({
         return (
             <span className="inline-block animate-pulse">
                 <div className="h-6 w-32 bg-gray-200 rounded"></div>
+            </span>
+        );
+    }
+    
+    if (totalCashInUSD === undefined || totalCashInUSD === null) {
+        return (
+            <span className="inline-block text-gray-500">
+                No data available
             </span>
         );
     }

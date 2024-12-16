@@ -1,11 +1,11 @@
-import { useUniswapV3Pool } from '../hooks/useUniswapV3Pool';
-import { useUniswapV3PoolData } from '../hooks/useUniswapV3PoolData';
-import { useTokenInfo } from '../hooks/useTokenInfo';
-import { formatCurrency } from '../utils/format';
+import { useUniswapV3Pool } from '../../hooks/useUniswapV3Pool';
+import { useUniswapV3PoolData } from '../../hooks/useUniswapV3PoolData';
+import { useTokenInfo } from '../../hooks/useTokenInfo';
+import { formatCurrency } from '../../utils/format';
 import { ExternalLink } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { ethereumService } from '../services/ethereum';
-import { coinGeckoService } from '../services/coingecko';
+import { ethereumService } from '../../services/ethereum';
+import { coinGeckoService } from '../../services/coingecko';
 
 interface PoolInfoDisplayProps {
   poolAddress: string;

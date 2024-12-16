@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { NetworkSelect } from '../../components/NetworkSelect';
-import { LiquidityTypeSelect } from '../../components/LiquidityTypeSelect';
-import { PriceRangeSelector } from '../../components/PriceRangeSelector';
-import { RecordList } from '../../components/RecordList';
+import { NetworkSelect } from '../../components/SimpleSelect/NetworkSelect';
+import { LiquidityTypeSelect } from '../../components/SimpleSelect/LiquidityTypeSelect';
+import { PriceRangeSelector } from '../../components/SimpleSelect/PriceRangeSelector';
+import { RecordList } from '../../components/Records/RecordList';
 import { 
   DEFAULT_NETWORK, 
   DEFAULT_LIQUIDITY_TYPE, 

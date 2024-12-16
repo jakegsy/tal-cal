@@ -1,4 +1,4 @@
-import { NetworkOption } from '../types';
+import { NetworkOption } from '../../types';
 import { ChevronDown } from 'lucide-react';
 
 interface NetworkSelectProps {

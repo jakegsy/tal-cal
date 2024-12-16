@@ -1,6 +1,6 @@
 import { UniswapV3LiquidityDisplay } from '../LiquidityInfo/UniswapV3LiquidityInfo';
 import { SingleVaultInfo, TotalVaultInfo } from '../LiquidityInfo/NativeVaultLiquidityInfo';
-import { PoolInfoDisplay } from '../PoolInfoDisplay';
+import { PoolInfoDisplay } from './PoolInfoDisplay';
 import { useEffect } from 'react';
 
 interface TotalLiquidityDisplayProps {
