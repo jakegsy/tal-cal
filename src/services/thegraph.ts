@@ -4,14 +4,12 @@ import { useQuery } from '@tanstack/react-query';
 // Get API key from environment variable
 const getApiKey = () => {
   // Try import.meta.env first (for Vite/browser)
-  if (typeof import.meta !== 'undefined' && 
-      'env' in import.meta && 
-      typeof (import.meta as any).env?.VITE_THEGRAPH_API_KEY === 'string') {
-    const apiKey = (import.meta as any).env.VITE_THEGRAPH_API_KEY.trim();
-    if (apiKey) {
+  
+  const apiKey = import.meta.env.VITE_THEGRAPH_API_KEY;
+  if (apiKey) {
       return apiKey;
-    }
-  }
+    
+  
 
   throw new Error('VITE_THEGRAPH_API_KEY environment variable is required');
 };
