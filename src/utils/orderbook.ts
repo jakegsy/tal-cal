@@ -159,5 +159,7 @@ export function formatLiquidity(amount: number): string {
 }
 
 export function parsePriceRangePercent(priceRange: string): number {
-  return parseInt(priceRange.replace('%', ''), 10);
+  const cleanedRange = priceRange.replace('%', '');
+  const parsedValue = parseFloat(cleanedRange);
+  return isNaN(parsedValue) ? 0 : parsedValue;
 }
