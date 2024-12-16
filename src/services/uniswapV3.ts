@@ -182,6 +182,7 @@ class UniswapV3Service {
     const adjustedPrice = price * price * (10 ** (decimals0 - decimals1));
     return adjustedPrice;
   }
+  
   async getLiquidity(poolAddress: string, startTick: number, endTick: number, tickSpacing: number): Promise<bigint> {
     const ticks = await this.getTickRange(poolAddress, startTick, endTick, tickSpacing);
     const totalLiquidity = computeActiveLiquidityAtStopTick(ticks, startTick, 0n, endTick);

@@ -11,7 +11,6 @@ export class CoinGeckoService {
     if (!apiKey) {
       console.warn('CoinGecko API key not found in environment variables');
     }
-
     this.api = axios.create({
       baseURL: COINGECKO_API_BASE,
       headers: {

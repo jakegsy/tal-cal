@@ -1,4 +1,4 @@
-import { RecordCard } from '../../components/RecordCard';
+import { RecordCard } from '../../components/Records/RecordCard';
 import { mockRecords } from '../../mocks/records';
 
 export function RecordsList() {

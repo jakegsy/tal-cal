@@ -53,19 +53,19 @@ export function useUniswapV3Liquidity(
                     priceRange
                 );
 
-                const ticks = calculateTicks(
-                    prices.startSqrtPriceX96,
-                    prices.endSqrtPriceX96,
-                    Number(poolData.tickSpacing)
-                );
+                // const ticks = calculateTicks(
+                //     prices.startSqrtPriceX96,
+                //     prices.endSqrtPriceX96,
+                //     Number(poolData.tickSpacing)
+                // );
 
                 //console.log("startTick: %s endTick: %s", ticks.startTick, ticks.endTick);
-                const totalLiquidityGross = await uniswapV3Service.getLiquidity(
-                    poolAddress,
-                    Number(ticks.startTick),
-                    Number(ticks.endTick),
-                    Number(poolData.tickSpacing)
-                );
+                // const totalLiquidityGross = await uniswapV3Service.getLiquidity(
+                //     poolAddress,
+                //     Number(ticks.startTick),
+                //     Number(ticks.endTick),
+                //     Number(poolData.tickSpacing)
+                // );
 
                     const scaleLiquidity = calculateLiquidity(
                     poolData.liquidity,
