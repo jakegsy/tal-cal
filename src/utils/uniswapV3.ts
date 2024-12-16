@@ -1,7 +1,8 @@
-import { PoolData } from "../services/uniswapV3";
+import { priceToClosestTick, tickToPrice } from "@uniswap/v3-sdk";
+
+// Q96 is a constant representing 2^96
 const Q96 = Math.pow(2, 96);
 const PERCENTAGE_BASE = 100;
-
 
 export function calculateLiquidity(
     totalLiquidity: bigint,
@@ -9,17 +10,23 @@ export function calculateLiquidity(
     endSqrtPriceX96: number,
     isToken0Base: boolean
 ): number {
-    const diffSqrtPriceX96 = Math.abs(startSqrtPriceX96 - endSqrtPriceX96);
-    console.log("diffSqrtPriceX96 %s startSqrtPriceX96 %s endSqrtPriceX96 %s", diffSqrtPriceX96, startSqrtPriceX96, endSqrtPriceX96);
-    const liquidityValue = isToken0Base
-        ? Number(totalLiquidity) * diffSqrtPriceX96 / Q96
-        : Number(totalLiquidity) * diffSqrtPriceX96 * Q96 / startSqrtPriceX96 / endSqrtPriceX96;
+    // Convert to decimal for precision
+    const L = Number(totalLiquidity);
     
-    return liquidityValue;
+    if (isToken0Base) {
+        // For token0 (USDC): Δx = L * (√pb - √pa) / Q96
+        return L * Math.abs(endSqrtPriceX96 - startSqrtPriceX96) / Q96 ;
+    } else {
+        // For token1 (ETH): Δy = L * (1/√pa - 1/√pb)
+        // First convert sqrt prices to decimal
+        const sa = startSqrtPriceX96 / Q96;
+        const sb = endSqrtPriceX96 / Q96;
+        return L * Math.abs(1/sa - 1/sb);
+    }
 } 
 
 export interface PriceCalculationResult {
-    priceBase: number;
+    startPrice: number;
     targetPrice: number;
     startSqrtPriceX96: number;
     endSqrtPriceX96: number;
@@ -57,31 +64,31 @@ export function calculateTicks(
 
 export function calculatePrices(
     sqrtPriceX96: number,
-    decimalScale: number,
     isToken0Base: boolean,
     priceRange: number
 ): PriceCalculationResult {
+    //starting off with sq(start price).2^96
     const startSqrtPriceX96 = sqrtPriceX96;
-
-    //retrieve start price
+    //retrieve start price by squaring and getting start price.2^192
     const startPriceX96 = startSqrtPriceX96 * startSqrtPriceX96;
-    //unscale it
-    const priceScale1per0 = startPriceX96 / Q96 / Q96;
+    //divide by 2^192 to get startPrice, note that decimal difference remains  
+    const startPrice = startPriceX96 / Q96 / Q96;
+    //note that startPrice is amounts of token 1 per token 0, and scales by
+    //10**(token1.decimals - token0.decimals)
+    //this will be for amounts of token 0 per token 1, redundantly done in case isToken0Base is false
+    const invStartPrice = 1 / startPrice;
 
-    const priceNorm1per0 = priceScale1per0 * decimalScale;
-    const priceNorm0per1 = 1 / priceNorm1per0;
-    const priceBase = 1 / priceNorm0per1;
+    //calculating in positive direction for both prices, taking care to perform it
+    //inverted appropriately 
     const targetPrice = isToken0Base
-        ? priceBase * (PERCENTAGE_BASE + priceRange) / PERCENTAGE_BASE
-        : priceBase * (PERCENTAGE_BASE - priceRange) / PERCENTAGE_BASE;
-    
-    console.log((PERCENTAGE_BASE + priceRange) / PERCENTAGE_BASE);
-    console.log((PERCENTAGE_BASE - priceRange) / PERCENTAGE_BASE);
-    
-    const endSqrtPriceX96 = Math.sqrt(targetPrice * (Q96 * Q96) / decimalScale);
+        ? 1 / (invStartPrice * (PERCENTAGE_BASE + priceRange) / PERCENTAGE_BASE)
+        : startPrice * (PERCENTAGE_BASE + priceRange) / PERCENTAGE_BASE;
+
+    //this has the effect of having the correct targetPrice here
+    const endSqrtPriceX96 = Math.sqrt(targetPrice * (Q96 * Q96));
     
     return {
-        priceBase,
+        startPrice,
         targetPrice,
         startSqrtPriceX96,
         endSqrtPriceX96
@@ -89,9 +96,6 @@ export function calculatePrices(
 } 
 
 
-// Define a minimal Tick type
-
-  
   /**
   * Compute active liquidity at a specific stop tick, given an initial tick and liquidity.
   *
@@ -125,7 +129,6 @@ export function calculatePrices(
       if (!movingUpward && (tickIdx >= currentTickIdx || tickIdx < stopTickIdx)) continue;
   
       // If the current tick is the stop tick, we've reached the end of the path
-      console.log(liquidityNet);
       // Update liquidity based on direction
       // If moving upward, we add liquidityNet. If moving downward, we subtract.
       state.liquidity += (movingUpward ? 1n : -1n) * liquidityNet;

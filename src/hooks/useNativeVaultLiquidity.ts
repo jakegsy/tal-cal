@@ -1,11 +1,11 @@
 import { useMemo } from 'react';
 import { useNativeVault } from './useNativeVault';
-import { useTokenPrice } from './useCoinGeckoPrice';
+import { useTokenPrice } from './useTokenData';
 import { NATIVE_QUOTE_TOKENS } from '../constants/tokens';
 
 interface VaultLiquidityResult {
   cash: bigint;
-  cashInUSD: number;
+  cashInUSD: number | null;
   loading: boolean;
   error: Error | null;
   refetch: () => Promise<void>;
@@ -19,14 +19,12 @@ interface AllVaultsLiquidityResult {
   refetchAll: () => Promise<void>;
 }
 
-
 /**
  * Hook to fetch liquidity data for a single vault
  * @param vaultAddress - Ethereum address of the vault
  * @returns Object containing cash amount, loading state, and error state
  */
 export function useVaultLiquidity(vaultAddress?: string): VaultLiquidityResult {
-
   const { vaultData, loading: vaultLoading, error, refetch } = useNativeVault(vaultAddress);
 
   // Find token info for the vault
@@ -34,18 +32,11 @@ export function useVaultLiquidity(vaultAddress?: string): VaultLiquidityResult {
     NATIVE_QUOTE_TOKENS.find(token => token.vaultAddress === vaultAddress),
     [vaultAddress]
   );
-  console.log("useVaultLiquidity for tokenInfo: %s", tokenInfo?.symbol);
-  // Get token price from CoinGecko
-  const { price: tokenPrice, loading: priceLoading } = useTokenPrice({
-    address: tokenInfo?.address ?? '',
-    platform: 'ethereum',
-    refreshInterval: 60000
-  });
-  console.log("useVaultLiquidity for tokenPrice: %s", tokenPrice);
+
+  // Get token price from CoinGecko using React Query
+  const { data: tokenPrice, isLoading: priceLoading } = useTokenPrice(tokenInfo?.address);
 
   return useMemo(() => {
-    // If there's no vault address, return default values
-    console.log("useVaultLiquidity for vaultAddress: %s", vaultAddress);
     if (!vaultAddress) {
       return {
         cash: 0n,
@@ -55,7 +46,7 @@ export function useVaultLiquidity(vaultAddress?: string): VaultLiquidityResult {
         refetch: async () => {}
       };
     }
-    // If there's an error, log it and return zero cash
+
     if (error) {
       console.warn(`Failed to fetch vault data for ${vaultAddress}:`, error);
       return {
@@ -68,16 +59,12 @@ export function useVaultLiquidity(vaultAddress?: string): VaultLiquidityResult {
     }
 
     const cash = vaultData?.cash ?? 0n;
-    console.log("useVaultLiquidity for cash: %s", cash);
     const decimals = tokenInfo?.decimals ?? 18;
-    console.log("useVaultLiquidity for decimals: %s", decimals);
-    // Ensure tokenPrice is a valid integer before converting to BigInt
  
     const cashInUSD = tokenPrice != null 
-    // TODO: may cause strange approximations if token near 1 or 0
-      ? Number((cash * BigInt(Math.round(tokenPrice))) / (BigInt(10) ** BigInt(decimals)))
+      ? Number((cash * BigInt(Math.round(tokenPrice * 1e8)) / BigInt(1e8)) / (BigInt(10) ** BigInt(decimals)))
       : null;
-    console.log("useVaultLiquidity for cashInUSD: %s", cashInUSD);
+
     return {
       cash,
       cashInUSD,

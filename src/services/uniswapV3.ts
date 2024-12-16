@@ -2,6 +2,7 @@ import { ethers } from 'ethers';
 import { UNISWAP_V3_POOL_ABI } from '../contracts/uniswapV3';
 import { ethereumService } from './ethereum';
 import { Tick, computeActiveLiquidityAtStopTick } from '../utils/uniswapV3';
+import { FeeAmount, Pool, TickMath, tickToPrice } from '@uniswap/v3-sdk'
 
 export interface PoolState {
   liquidity: bigint;
