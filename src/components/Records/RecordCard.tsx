@@ -1,5 +1,5 @@
 import { ExternalLink } from 'lucide-react';
-import { formatAddress } from '../utils/validation';
+import { formatAddress } from '../../utils/validation';
 
 interface RecordCardProps {
   tokenName: string;
