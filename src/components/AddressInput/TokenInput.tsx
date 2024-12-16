@@ -23,15 +23,15 @@ export function TokenInput({
   isNativeLiquidity = false,
   hideLabel = false
 }: TokenInputProps) {
-  const shouldFetchTokenInfo = !isNativeLiquidity && value && isValidEthereumAddress(value);
+  const shouldFetchTokenInfo = value && isValidEthereumAddress(value);
   const { data: tokenInfo, isLoading } = useTokenInfo(shouldFetchTokenInfo ? value : undefined);
 
   const validateToken = (address: string) => {
     return isValidEthereumAddress(address);
   };
 
-  const error = isNativeLiquidity && value && isValidEthereumAddress(value)
-    ? "Only predefined tokens are supported for Native Liquidity"
+  const error = value && !isValidEthereumAddress(value)
+    ? "Only valid Ethereum addresses are allowed"
     : undefined;
 
   const badge = useMemo(() => {
