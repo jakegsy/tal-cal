@@ -115,12 +115,22 @@ const TICKS_QUERY = `
 // Service functions that integrate with React Query
 export const graphService = {
   getPool: async (poolAddress: string): Promise<PoolData> => {
+    console.log('graphService.getPool called with:', poolAddress);
     const apiKey = getApiKey();
     const client = createGraphClient(apiKey);
+    console.log('Fetching pool data from TheGraph...');
     const { data, error } = await client.query(POOL_QUERY, { poolAddress: poolAddress.toLowerCase() }).toPromise();
-    if (error) throw error;
-    if (!data?.pool) throw new Error('Pool not found');
     
+    if (error) {
+      console.error('TheGraph API error:', error);
+      throw error;
+    }
+    if (!data?.pool) {
+      console.error('Pool not found:', poolAddress);
+      throw new Error('Pool not found');
+    }
+    
+    console.log('Pool data received:', data.pool);
     return data.pool;
   },
 
@@ -159,10 +169,14 @@ export const graphService = {
 };
 
 // React Query hooks
-export const usePoolData = (poolAddress: string) => {
+export const usePoolData = (poolAddress?: string) => {
+  console.log('usePoolData called with:', poolAddress);
   return useQuery({
     queryKey: graphQueryKeys.pool(poolAddress),
-    queryFn: () => graphService.getPool(poolAddress),
+    queryFn: () => {
+      if (!poolAddress) throw new Error('Pool address is required');
+      return graphService.getPool(poolAddress);
+    },
     enabled: Boolean(poolAddress),
     staleTime: 30000, // Consider data stale after 30 seconds
     gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes

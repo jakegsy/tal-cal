@@ -1,4 +1,4 @@
-import { usePoolData } from '../../hooks/useUniswapV3';
+import { usePoolData } from '../../services/thegraph';
 import { AddressInput } from './AddressInput';
 import { PoolPairInfo } from '../PoolPairInfo';
 import { isValidEthereumAddress } from '../../utils/validation';
@@ -28,7 +28,14 @@ export function PoolInput({
       {isLoading ? (
         <span className="text-sm font-medium text-gray-500">Loading...</span>
       ) : poolData ? (
-        <PoolPairInfo poolAddress={value} />
+        <div className="flex items-center space-x-1">
+          <span className="text-sm font-medium">
+            {poolData.token0.symbol}-{poolData.token1.symbol}
+          </span>
+          <span className="text-xs text-gray-500">
+            {(Number(poolData.feeTier) / 10000).toFixed(2)}%
+          </span>
+        </div>
       ) : null}
     </div>
   ) : null;
