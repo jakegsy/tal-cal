@@ -10,7 +10,7 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "test": "jest",
-    "test:graph": "TS_NODE_PROJECT=tsconfig.scripts.json node --loader ts-node/esm src/scripts/test-graph.ts"
+    "test:graph": "node --loader ts-node/esm src/scripts/test-graph.ts"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.0",
