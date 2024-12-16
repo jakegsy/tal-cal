@@ -1,20 +1,22 @@
-import { useTokenInfo } from '../hooks/useTokenInfo';
+import { useTokenInfo } from '../hooks/useTokenData';
 import { useUniswapV3Pool } from '../hooks/useUniswapV3Pool';
 
 interface PoolPairInfoProps {
   poolAddress: string;
 }
 
-function formatFeePercent(fee: number): string {
-  return `${(fee / 10000).toFixed(3)}%`;
+function formatFeePercent(fee: bigint): string {
+  return `${(Number(fee) / 10000).toFixed(3)}%`;
 }
 
 export function PoolPairInfo({ poolAddress }: PoolPairInfoProps) {
   const { poolInfo, loading: poolLoading, error: poolError } = useUniswapV3Pool(poolAddress);
-  const { tokenInfo: token0Info } = useTokenInfo(poolInfo?.token0);
-  const { tokenInfo: token1Info } = useTokenInfo(poolInfo?.token1);
+  const { data: token0Info, isLoading: token0Loading } = useTokenInfo(poolInfo?.token0);
+  const { data: token1Info, isLoading: token1Loading } = useTokenInfo(poolInfo?.token1);
 
-  if (poolLoading) {
+  const isLoading = poolLoading || token0Loading || token1Loading;
+
+  if (isLoading) {
     return (
       <div className="flex items-center gap-2">
         <div className="flex -space-x-1">
@@ -54,8 +56,8 @@ export function PoolPairInfo({ poolAddress }: PoolPairInfoProps) {
           }}
         />
       </div>
-      <span className="text-sm text-gray-600">
-        {token0Info.symbol}-{token1Info.symbol} {formatFeePercent(Number(poolInfo.fee))}
+      <span className="text-sm text-gray-900">
+        {token0Info.symbol}/{token1Info.symbol} {formatFeePercent(poolInfo.fee)}
       </span>
     </div>
   );

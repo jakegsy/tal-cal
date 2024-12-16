@@ -1,10 +1,8 @@
 import { useUniswapV3Pool } from '../../hooks/useUniswapV3Pool';
 import { useUniswapV3PoolData } from '../../hooks/useUniswapV3PoolData';
-import { useTokenInfo } from '../../hooks/useTokenInfo';
-import { useTokenBalance, useTokenPrice } from '../../hooks/useTokenData';
+import { useTokenBalance, useTokenPrice, useTokenInfo } from '../../hooks/useTokenData';
 import { formatCurrency } from '../../utils/format';
 import { ExternalLink } from 'lucide-react';
-
 
 interface PoolInfoDisplayProps {
   poolAddress: string;

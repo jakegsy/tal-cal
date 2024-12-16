@@ -1,14 +1,14 @@
 import { Circle } from 'lucide-react';
-import { useTokenInfo } from '../hooks/useTokenInfo';
+import { useTokenInfo } from '../hooks/useTokenData';
 
 interface TokenInfoProps {
   address?: string;
 }
 
 export function TokenInfo({ address }: TokenInfoProps) {
-  const { tokenInfo, loading, error } = useTokenInfo(address);
+  const { data: tokenInfo, isLoading, isError } = useTokenInfo(address);
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex items-center gap-2">
         <Circle className="w-5 h-5 animate-pulse text-gray-400" />
@@ -17,7 +17,7 @@ export function TokenInfo({ address }: TokenInfoProps) {
     );
   }
 
-  if (error || !tokenInfo) {
+  if (isError || !tokenInfo) {
     return null;
   }
 
