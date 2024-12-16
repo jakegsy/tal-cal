@@ -24,6 +24,11 @@ interface AddressInputProps {
   error?: string;
   validate?: (address: string) => boolean;
   badge?: ReactNode;
+  savedValues?: Array<{
+    address: string;
+    label: string;
+  }>;
+  isLoading?: boolean;
 }
 
 export function AddressInput({ 
@@ -34,8 +39,11 @@ export function AddressInput({
   hideLabel = false,
   error,
   validate,
-  badge
+  badge,
+  savedValues = [],
+  isLoading = false
 }: AddressInputProps) {
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const isValidInput = !value || (validate ? validate(value) : isValidEthereumAddress(value));
   
   const errorMessage = value && !isValidInput 
@@ -50,29 +58,53 @@ export function AddressInput({
         <span className={styles.label}>{!hideLabel && label}</span>
         {badge}
       </div>
-      
       <div className="relative">
-        <div className="relative flex">
-          <input
-            type="text"
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
-            placeholder={placeholder}
-            className={`${styles.input.base} ${
-              errorMessage ? styles.input.invalid : styles.input.valid
-            }`}
-          />
-          {value && (
-            <button
-              onClick={() => onChange('')}
-              className={styles.clearButton}
-            >
-              <X size={16} />
-            </button>
-          )}
-        </div>
+        <input
+          type="text"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          className={`${styles.input.base} ${
+            errorMessage ? styles.input.invalid : styles.input.valid
+          }`}
+          onFocus={() => setIsDropdownOpen(true)}
+        />
+        {value && (
+          <button
+            onClick={() => onChange("")}
+            className={styles.clearButton}
+            type="button"
+          >
+            <X size={16} />
+          </button>
+        )}
+        
+        {/* Dropdown Menu */}
+        {isDropdownOpen && savedValues.length > 0 && (
+          <div 
+            className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg"
+            onMouseLeave={() => setIsDropdownOpen(false)}
+          >
+            {isLoading ? (
+              <div className="px-4 py-2 text-sm text-gray-500">Loading...</div>
+            ) : (
+              savedValues.map((item, index) => (
+                <button
+                  key={index}
+                  className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50"
+                  onClick={() => {
+                    onChange(item.address);
+                    setIsDropdownOpen(false);
+                  }}
+                >
+                  <div className="font-medium">{item.label}</div>
+                  <div className="text-xs text-gray-500 font-mono">{item.address}</div>
+                </button>
+              ))
+            )}
+          </div>
+        )}
       </div>
-
       {errorMessage && (
         <p className={styles.errorMessage}>{errorMessage}</p>
       )}

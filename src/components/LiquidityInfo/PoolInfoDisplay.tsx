@@ -4,10 +4,18 @@ import { useUniswapV3Pool } from '../../hooks/useUniswapV3Pool';
 import { formatCurrency } from '../../utils/format';
 import { ExternalLink } from 'lucide-react';
 
+function formatTokenAmount(amount: number | null): string {
+  if (amount === null) return '';
+  return new Intl.NumberFormat('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(amount);
+}
+
 function useTokenData(tokenId: string | undefined, poolAddress: string) {
-  const { data: balance } = useTokenBalance(tokenId || '', poolAddress);
-  const { data: price } = useTokenPrice(tokenId || '');
-  return { balance, price };
+  const { data: balance, isLoading: balanceLoading } = useTokenBalance(tokenId || '', poolAddress);
+  const { data: price, isLoading: priceLoading } = useTokenPrice(tokenId || '');
+  return { balance, price, isLoading: balanceLoading || priceLoading };
 }
 
 interface PoolInfoDisplayProps {
@@ -42,9 +50,10 @@ export function PoolInfoDisplay({ poolAddress }: PoolInfoDisplayProps) {
   }
 
   const poolName = `Uniswap V3 ${poolInfo.token0.symbol}-${poolInfo.token1.symbol} ${(Number(poolInfo.feeTier) / 10000).toFixed(2)}%`;
-  const token0Amt = Number(token0Data.balance || 0)/ 10**Number(poolInfo.token0.decimals);
-  const token1Amt = Number(token1Data.balance || 0)/ 10**Number(poolInfo.token1.decimals);
-  const TVLinUSD = (token0Amt * (token0Data.price || 0)) + (token1Amt * (token1Data.price || 0));
+  const token0Amt = token0Data.isLoading ? null : Number(token0Data.balance || 0) / 10**Number(poolInfo.token0.decimals);
+  const token1Amt = token1Data.isLoading ? null : Number(token1Data.balance || 0) / 10**Number(poolInfo.token1.decimals);
+  const TVLinUSD = token0Data.isLoading || token1Data.isLoading ? null : 
+    ((token0Amt || 0) * (token0Data.price || 0)) + ((token1Amt || 0) * (token1Data.price || 0));
 
   return (
     <div className="mt-6 bg-white rounded-lg border border-gray-200 p-6">      
@@ -56,17 +65,23 @@ export function PoolInfoDisplay({ poolAddress }: PoolInfoDisplayProps) {
         
         <div className="flex justify-between">
           <span className="text-gray-600">Pooled Base Token:</span>
-          <span>{token0Amt} {poolInfo.token0.symbol}</span>
+          <span>
+            {token0Data.isLoading ? "Loading..." : `${formatTokenAmount(token0Amt)} ${poolInfo.token0.symbol}`}
+          </span>
         </div>
         
         <div className="flex justify-between">
           <span className="text-gray-600">Pooled Paired Token:</span>
-          <span>{token1Amt} {poolInfo.token1.symbol}</span>
+          <span>
+            {token1Data.isLoading ? "Loading..." : `${formatTokenAmount(token1Amt)} ${poolInfo.token1.symbol}`}
+          </span>
         </div>
         
         <div className="flex justify-between">
           <span className="text-gray-600">TVL USD:</span>
-          <span>{formatCurrency(TVLinUSD)}</span>
+          <span>
+            {token0Data.isLoading || token1Data.isLoading ? "Loading..." : formatCurrency(TVLinUSD)}
+          </span>
         </div>
       </div>
       

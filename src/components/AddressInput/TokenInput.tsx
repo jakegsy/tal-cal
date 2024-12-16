@@ -26,6 +26,23 @@ export function TokenInput({
   const shouldFetchTokenInfo = value && isValidEthereumAddress(value);
   const { data: tokenInfo, isLoading } = useTokenInfo(shouldFetchTokenInfo ? value : undefined);
 
+  // Common tokens that can be pre-populated
+  const savedTokens = useMemo(() => [
+    {
+      address: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      label: "WETH",
+    },
+    {
+      address: "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
+      label: "WBTC",
+    },
+    {
+      address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      label: "USDC",
+    },
+    // Add more common tokens as needed
+  ], []);
+
   const validateToken = (address: string) => {
     return isValidEthereumAddress(address);
   };
@@ -57,17 +74,19 @@ export function TokenInput({
         </div>
       </span>
     );
-  }, [value, tokenInfo, isLoading]);
+  }, [value, isLoading, tokenInfo]);
 
   return (
     <AddressInput
       value={value}
       onChange={onChange}
-      validate={validateToken}
       label={label}
       hideLabel={hideLabel}
+      validate={validateToken}
       error={error}
       badge={badge}
+      savedValues={savedTokens}
+      isLoading={isLoading}
     />
   );
 }
