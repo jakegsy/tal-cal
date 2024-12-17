@@ -5,34 +5,26 @@ interface PoolPairInfoProps {
   poolAddress: string;
 }
 
-function formatFeePercent(fee: bigint): string {
-  return `${(Number(fee) / 10000).toFixed(3)}%`;
+function formatFeePercent(feeTier: string): string {
+  return `${(Number(feeTier) / 10000).toFixed(3)}%`;
 }
 
 export function PoolPairInfo({ poolAddress }: PoolPairInfoProps) {
-  const { poolInfo, loading: poolLoading, error: poolError } = useUniswapV3Pool(poolAddress);
-  const { data: token0Info, isLoading: token0Loading } = useTokenInfo(poolInfo?.token0);
-  const { data: token1Info, isLoading: token1Loading } = useTokenInfo(poolInfo?.token1);
+  const { poolInfo, loading: poolLoading } = useUniswapV3Pool(poolAddress);
+  const { data: token0Info, isLoading: token0Loading } = useTokenInfo(poolInfo?.token0?.id);
+  const { data: token1Info, isLoading: token1Loading } = useTokenInfo(poolInfo?.token1?.id);
 
   const isLoading = poolLoading || token0Loading || token1Loading;
 
-  if (isLoading) {
+  if (isLoading || !poolInfo || !token0Info || !token1Info) {
     return (
       <div className="flex items-center gap-2">
         <div className="flex -space-x-1">
-          <div className="w-6 h-6 rounded-full bg-gray-200 animate-pulse" />
-          <div className="w-6 h-6 rounded-full bg-gray-200 animate-pulse" />
+          <div className="w-5 h-5 rounded-full bg-gray-200 animate-pulse" />
+          <div className="w-5 h-5 rounded-full bg-gray-200 animate-pulse" />
         </div>
-        <div className="h-4 w-24 bg-gray-200 rounded animate-pulse" />
+        <span className="text-sm text-gray-400">Loading...</span>
       </div>
-    );
-  }
-
-  if (poolError || !poolInfo || !token0Info || !token1Info) {
-    return (
-      <p className="mt-1 text-sm text-red-500">
-        {poolError ? 'Invalid Uniswap V3 pool address' : 'Unable to load pool information'}
-      </p>
     );
   }
 
@@ -40,24 +32,24 @@ export function PoolPairInfo({ poolAddress }: PoolPairInfoProps) {
     <div className="flex items-center gap-2">
       <div className="flex -space-x-1">
         <img
-          src={token0Info.logoURI || `https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/32/icon/${token0Info.symbol.toLowerCase()}.png`}
+          src={token0Info.icon}
           alt={token0Info.symbol}
-          className="w-6 h-6 rounded-full border border-gray-200 bg-white"
-          onError={(e) => {
-            e.currentTarget.src = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2'><circle cx='12' cy='12' r='10'/></svg>`;
+          className="w-5 h-5 rounded-full bg-white"
+          style={{
+            border: '2px solid white',
           }}
         />
         <img
-          src={token1Info.logoURI || `https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/32/icon/${token1Info.symbol.toLowerCase()}.png`}
+          src={token1Info.icon}
           alt={token1Info.symbol}
-          className="w-6 h-6 rounded-full border border-gray-200 bg-white"
-          onError={(e) => {
-            e.currentTarget.src = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2'><circle cx='12' cy='12' r='10'/></svg>`;
+          className="w-5 h-5 rounded-full bg-white"
+          style={{
+            border: '2px solid white',
           }}
         />
       </div>
       <span className="text-sm text-gray-900">
-        {token0Info.symbol}/{token1Info.symbol} {formatFeePercent(poolInfo.fee)}
+        {token0Info.symbol}/{token1Info.symbol} {formatFeePercent(poolInfo.feeTier)}
       </span>
     </div>
   );

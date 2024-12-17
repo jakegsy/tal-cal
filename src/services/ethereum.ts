@@ -44,6 +44,7 @@ class EthereumService {
   async getTokenInfo(tokenAddress: string): Promise<TokenInfo> {
     try {
       // Check cache first
+      console.log("here is my adddress?", tokenAddress);
       const cached = this.tokenCache.get(tokenAddress.toLowerCase());
       if (cached) return cached;
 

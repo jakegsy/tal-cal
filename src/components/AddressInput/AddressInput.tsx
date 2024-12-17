@@ -29,6 +29,7 @@ interface AddressInputProps {
     label: string;
   }>;
   isLoading?: boolean;
+  readOnly?: boolean;
 }
 
 export function AddressInput({ 
@@ -41,7 +42,8 @@ export function AddressInput({
   validate,
   badge,
   savedValues = [],
-  isLoading = false
+  isLoading = false,
+  readOnly = false
 }: AddressInputProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const isValidInput = !value || (validate ? validate(value) : isValidEthereumAddress(value));
@@ -62,14 +64,15 @@ export function AddressInput({
         <input
           type="text"
           value={value}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(e) => !readOnly && onChange(e.target.value)}
           placeholder={placeholder}
           className={`${styles.input.base} ${
             errorMessage ? styles.input.invalid : styles.input.valid
-          }`}
+          } ${readOnly ? 'cursor-pointer bg-gray-50' : ''}`}
           onFocus={() => setIsDropdownOpen(true)}
+          readOnly={readOnly}
         />
-        {value && (
+        {value && !readOnly && (
           <button
             onClick={() => onChange("")}
             className={styles.clearButton}

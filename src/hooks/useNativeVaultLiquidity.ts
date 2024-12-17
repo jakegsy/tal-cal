@@ -83,7 +83,6 @@ export function useAllNativeVaultsLiquidity(): AllVaultsLiquidityResult {
   const vaultResults = NATIVE_QUOTE_TOKENS.map(token => 
     useVaultLiquidity(token.vaultAddress)
   );
-  console.log("Vault results: %s", vaultResults);
 
   const result = useMemo(() => {
     const isLoading = vaultResults.some(result => result.loading);

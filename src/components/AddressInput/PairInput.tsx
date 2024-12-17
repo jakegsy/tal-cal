@@ -25,14 +25,21 @@ export function PairInput({
   hideLabel = false,
   priceRange = 0.1
 }: PairInputProps) {
-  const savedTokens = useMemo(() => 
-    NATIVE_QUOTE_TOKENS.map((token) => ({
+  const savedTokens = useMemo(() => [
+    {
+      address: "",
+      label: "Select all liquidity",
+    },
+    ...NATIVE_QUOTE_TOKENS.map((token) => ({
       address: token.address,
       label: token.symbol,
     }))
-  , []);
+  ], []);
 
   const validateToken = (address: string) => {
+    // Empty string is valid (represents "all liquidity")
+    if (address === "") return true;
+    
     // Only allow addresses that are in NATIVE_QUOTE_TOKENS
     return isValidEthereumAddress(address) && 
       NATIVE_QUOTE_TOKENS.some(token => 
@@ -68,6 +75,8 @@ export function PairInput({
           validate={validateToken}
           error={error}
           savedValues={savedTokens}
+          readOnly={true}
+          placeholder={value ? "Select a token" : "All liquidity"}
         />
         <div className="flex justify-end">
           <VaultLiquidityInfo 
