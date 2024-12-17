@@ -103,9 +103,9 @@ export function Calculator() {
           />
         </div>
 
-        <div>
+        {/* <div>
           <h2 className="text-xl font-bold mb-4">How it works?</h2>
-        </div>
+        </div> */}
       </div>
       
       
