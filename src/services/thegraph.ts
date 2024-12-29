@@ -9,13 +9,17 @@ const getApiKey = () => {
   // Try import.meta.env first (for Vite/browser)
   
   
-  const apiKey = 'd4f6ef6b3a8f5dc4b901c1a989df4644'
-
-
-  if (apiKey) {
-      return apiKey;
-    
+  const viteApiKey = import.meta.env?.VITE_THEGRAPH_API_KEY;
+  if (viteApiKey) {
+    return viteApiKey;
   }
+  
+  // Try process.env as fallback (for Node.js/testing)
+  const nodeApiKey = process.env.VITE_THEGRAPH_API_KEY;
+  if (nodeApiKey) {
+    return nodeApiKey;
+  }
+  
 
   throw new Error('VITE_THEGRAPH_API_KEY environment variable is required');
 };
