@@ -9,6 +9,7 @@ interface AddressInputSectionProps {
   priceRange: number;
   onBaseTokenChange: (value: string) => void;
   onPairTokenChange: (value: string) => void;
+  onPairInfoChange?: (pairInfo: string) => void;
 }
 
 export function AddressInputSection({
@@ -18,6 +19,7 @@ export function AddressInputSection({
   priceRange,
   onBaseTokenChange,
   onPairTokenChange,
+  onPairInfoChange,
 }: AddressInputSectionProps) {
   const isUniswapV3 = liquidityType === 'uniswap_v3';
   const isNativeLiquidity = liquidityType === 'native';
@@ -37,6 +39,7 @@ export function AddressInputSection({
             label="Pool Address:"
             value={pairToken}
             onChange={onPairTokenChange}
+            onPairInfoChange={onPairInfoChange}
           />
         ) : isNativeLiquidity ? (
           <PairInput

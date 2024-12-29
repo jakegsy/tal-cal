@@ -36,13 +36,15 @@ interface PoolInputProps {
   onChange: (value: string) => void;
   label?: string;
   hideLabel?: boolean;
+  onPairInfoChange?: (pairInfo: string) => void;
 }
 
 export function PoolInput({
   value,
   onChange,
   label = "Pool",
-  hideLabel = false
+  hideLabel = false,
+  onPairInfoChange
 }: PoolInputProps) {
   const { loading: poolLoading } = useUniswapV3Pool(value || undefined);
   const savedPools = useMemo(() => POPULAR_POOLS, []);
@@ -50,7 +52,7 @@ export function PoolInput({
   const badge = poolLoading 
     ? <span className={styles.badge}>Loading...</span>
     : value 
-      ? <PoolPairInfo poolAddress={value} />
+      ? <PoolPairInfo poolAddress={value} onPairInfoChange={onPairInfoChange} />
       : null;
 
   return (

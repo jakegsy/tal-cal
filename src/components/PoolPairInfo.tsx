@@ -1,20 +1,33 @@
 import { useTokenInfo } from '../hooks/useTokenData';
 import { useUniswapV3Pool } from '../hooks/useUniswapV3Pool';
+import { useEffect } from 'react';
 
 interface PoolPairInfoProps {
   poolAddress: string;
+  onPairInfoChange?: (pairInfo: string) => void;
+  onDebugInfo?: (info: string) => void;
 }
 
 function formatFeePercent(feeTier: string): string {
   return `${(Number(feeTier) / 10000).toFixed(3)}%`;
 }
 
-export function PoolPairInfo({ poolAddress }: PoolPairInfoProps) {
+export function PoolPairInfo({ poolAddress, onPairInfoChange, onDebugInfo }: PoolPairInfoProps) {
   const { poolInfo, loading: poolLoading } = useUniswapV3Pool(poolAddress);
   const { data: token0Info, isLoading: token0Loading } = useTokenInfo(poolInfo?.token0?.id);
   const { data: token1Info, isLoading: token1Loading } = useTokenInfo(poolInfo?.token1?.id);
-
   const isLoading = poolLoading || token0Loading || token1Loading;
+
+  useEffect(() => {
+    if (!isLoading && poolInfo && token0Info && token1Info && onPairInfoChange) {
+      const formattedPairInfo = `${token0Info.symbol}/${token1Info.symbol} ${formatFeePercent(poolInfo.feeTier)}`;
+      console.log('PoolPairInfo sending:', formattedPairInfo);
+      onPairInfoChange(formattedPairInfo);
+      if (onDebugInfo) {
+        onDebugInfo(`Pool Info: ${JSON.stringify(poolInfo)} Token 0 Info: ${JSON.stringify(token0Info)} Token 1 Info: ${JSON.stringify(token1Info)}`);
+      }
+    }
+  }, [isLoading, poolInfo, token0Info, token1Info, onPairInfoChange, onDebugInfo]);
 
   if (isLoading || !poolInfo || !token0Info || !token1Info) {
     return (

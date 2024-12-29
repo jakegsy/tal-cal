@@ -42,7 +42,10 @@ export function TotalLiquidityDisplay({
     />;
   };
 
+
   const renderAdditionalInfo = () => {
+    console.log('look here:', liquidityType, poolAddress)
+
     if (liquidityType === 'uniswap_v3' && poolAddress) {
       return <PoolInfoDisplay poolAddress={poolAddress} />;
     }
@@ -73,7 +76,10 @@ export function TotalLiquidityDisplay({
         <span>Total Available Liquidity:</span>
         <span>{renderLiquidityValue()}</span>
       </h2>
+      
       {renderAdditionalInfo()}
+     
     </div>
+    
   );
 }

@@ -29,6 +29,7 @@ export function PoolInfoDisplay({ poolAddress }: PoolInfoDisplayProps) {
   
   // Early return for loading and error states
   if (poolLoading) {
+    console.log('look here',poolLoading, poolError,poolInfo)
     return (
       <div className="mt-6 bg-gray-50 rounded-lg p-6 animate-pulse">
         <div className="h-4 bg-gray-200 rounded w-1/3 mb-4"></div>
@@ -41,6 +42,7 @@ export function PoolInfoDisplay({ poolAddress }: PoolInfoDisplayProps) {
     );
   }
 
+  // pool info empty
   if (poolError || !poolInfo) {
     return (
       <div className="mt-6 bg-red-50 text-red-600 rounded-lg p-6">

@@ -13,7 +13,7 @@ export interface TokenInfo {
 
 class EthereumService {
   private provider: ethers.JsonRpcProvider;
-  private tokenCache: Map<string, TokenInfo>;
+  private tokenCache: Map<string, { data: TokenInfo; timestamp: number }>;
 
   constructor() {
     const rpcUrl = import.meta.env.VITE_ETHEREUM_RPC_URL || DEFAULT_RPC_URL;
@@ -21,6 +21,7 @@ class EthereumService {
     this.tokenCache = new Map();
     console.log(`Ethereum service initialized with RPC URL: ${rpcUrl}`);
   }
+
   async getTokenBalance(tokenAddress: string, holderAddress: string): Promise<bigint> {
     try {
       const contract = new ethers.Contract(tokenAddress, ERC20_ABI, this.provider);
@@ -33,9 +34,9 @@ class EthereumService {
 
   private async getTokenIcon(address: string): Promise<string | undefined> {
     try {
-      // Try to get icon from Trust Wallet assets
+      // Try to get icon from Trust Wallet CDN
       const checksumAddress = ethers.getAddress(address);
-      return `https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/${checksumAddress}/logo.png`;
+      return `https://assets-cdn.trustwallet.com/blockchains/ethereum/assets/${checksumAddress}/logo.png`;
     } catch {
       return undefined;
     }
@@ -43,10 +44,14 @@ class EthereumService {
 
   async getTokenInfo(tokenAddress: string): Promise<TokenInfo> {
     try {
-      // Check cache first
-      console.log("here is my adddress?", tokenAddress);
+      // Check cache first with a 5-minute expiry
       const cached = this.tokenCache.get(tokenAddress.toLowerCase());
-      if (cached) return cached;
+      const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+      const now = Date.now();
+
+      if (cached && cached.timestamp && (now - cached.timestamp) < CACHE_DURATION) {
+        return cached.data;
+      }
 
       const contract = new ethers.Contract(tokenAddress, ERC20_ABI, this.provider);
 
@@ -67,8 +72,12 @@ class EthereumService {
         icon
       };
 
-      // Cache the result
-      this.tokenCache.set(tokenAddress.toLowerCase(), tokenInfo);
+      // Cache the result with timestamp
+      this.tokenCache.set(tokenAddress.toLowerCase(), {
+        data: tokenInfo,
+        timestamp: now
+      });
+
       return tokenInfo;
     } catch (error) {
       console.error(`Error fetching token info for ${tokenAddress}:`, error);

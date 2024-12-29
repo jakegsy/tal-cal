@@ -1,11 +1,17 @@
 import { createClient, cacheExchange, fetchExchange } from 'urql';
 import { useQuery } from '@tanstack/react-query';
 
+
+
+
 // Get API key from environment variable
 const getApiKey = () => {
   // Try import.meta.env first (for Vite/browser)
   
-  const apiKey = import.meta.env.VITE_THEGRAPH_API_KEY;
+  
+  const apiKey = 'd4f6ef6b3a8f5dc4b901c1a989df4644'
+
+
   if (apiKey) {
       return apiKey;
     
@@ -13,6 +19,8 @@ const getApiKey = () => {
 
   throw new Error('VITE_THEGRAPH_API_KEY environment variable is required');
 };
+
+
 
 // Create client function
 const createGraphClient = (apiKey: string) => {

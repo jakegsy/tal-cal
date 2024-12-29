@@ -77,6 +77,7 @@ export function PairInput({
           savedValues={savedTokens}
           readOnly={true}
           placeholder={value ? "Select a token" : "All liquidity"}
+          
         />
         <div className="flex justify-end">
           <VaultLiquidityInfo 
