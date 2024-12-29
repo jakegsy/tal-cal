@@ -18,12 +18,12 @@ const POPULAR_POOLS = [
     label: "USDC/ETH 0.05%",
   },
   {
-    address: "0x4e68Ccd3E89f51C3074ca5072bbAC773960dFa36",
+    address: "0x7bea39867e4169dbe237d55c8242a8f2fcdcc387",
     label: "USDC/ETH 1%",
   },
   {
-    address: "0x11b815efB8f581194ae79006d24E0d814B7697F6",
-    label: "USDT/ETH 0.3%",
+    address: "0x4e68ccd3e89f51c3074ca5072bbac773960dfa36",
+    label: "WETH/USDT 0.3%",
   },
   {
     address: "0xCBCdF9626bC03E24f779434178A73a0B4bad62eD",
@@ -31,6 +31,7 @@ const POPULAR_POOLS = [
   },
 ];
 
+// value is the pairToken address
 interface PoolInputProps {
   value: string;
   onChange: (value: string) => void;

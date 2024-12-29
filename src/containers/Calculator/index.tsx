@@ -25,20 +25,6 @@ interface Record {
   poolPairInfo?: string;
 }
 
-const DebugCorner = () => (
-  <div className="p-4 bg-gray-100 rounded-lg m-4">
-    <h1 className="text-xl font-bold mb-4">DEBUG CORNER</h1>
-    <div className="grid grid-cols-3 gap-4">
-      {Object.entries(TOKEN_DATABASE).map(([symbol, token]) => (
-        <div key={symbol} className="flex items-center space-x-2 bg-white p-2 rounded">
-          <img src={token.icon} alt={symbol} className="w-6 h-6" />
-          <span>{symbol}</span>
-        </div>
-      ))}
-    </div>
-  </div>
-);
-
 export function Calculator() {
   const [network, setNetwork] = useState(DEFAULT_NETWORK);
   const [liquidityType, setLiquidityType] = useState(DEFAULT_LIQUIDITY_TYPE);
@@ -50,12 +36,6 @@ export function Calculator() {
   const [records, setRecords] = useState<Record[]>([]);
   const [poolPairInfo, setPoolPairInfo] = useState<string>('');
   const [liquidityValue, setLiquidityValue] = useState<string>('');
-  
-  // calculatorChildValue is a list of object that is passed into record list, which is then mapped into each 
-  // record card
-
-
-  
 
   useEffect(() => {
     if (poolPairInfo && records.length > 0) {
@@ -100,7 +80,7 @@ export function Calculator() {
 
   return (
     <div className="flex flex-col lg:flex-row w-full min-h-screen">
-      {false && <DebugCorner />}
+      
       <div className="w-full lg:w-[65%] p-4 md:p-6 lg:p-8">
         <h1 className="text-2xl md:text-3xl font-bold mb-4 md:mb-6 lg:mb-8">Total Available Liquidity Calculator</h1>
         
