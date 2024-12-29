@@ -8,6 +8,8 @@ export interface TokenInfo {
   vaultAddress?: string;
 }
 
+
+
 export const TOKEN_DATABASE: { [key: string]: TokenInfo } = {
   USDC: {
     symbol: 'USDC',
@@ -55,6 +57,7 @@ export const TOKEN_DATABASE: { [key: string]: TokenInfo } = {
   }
 };
 
+
 // Keep existing NATIVE_QUOTE_TOKENS for backward compatibility
 export const NATIVE_QUOTE_TOKENS = [
   {
@@ -67,7 +70,7 @@ export const NATIVE_QUOTE_TOKENS = [
   {
     symbol: 'USDT',
     address: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
-    vaultAddress: '0x2c82c6ceF20885aD41E8f29E5C35A2857BD3f3Fa',
+    vaultAddress: '0x9b705F534fc09212071bAD509Ba86a8042BDef10',
     icon: 'https://assets-cdn.trustwallet.com/blockchains/ethereum/assets/0xdAC17F958D2ee523a2206206994597C13D831ec7/logo.png',
     decimals: 6
   },
