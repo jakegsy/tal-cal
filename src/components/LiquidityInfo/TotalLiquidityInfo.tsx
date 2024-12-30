@@ -53,13 +53,13 @@ export function TotalLiquidityDisplay({
       return (
         <div className="flex gap-2">
           <button 
-            onClick={() => window.open(`https://app.uniswap.org/explore/pools/ethereum/${pairToken}`, '_blank')}
+            onClick={() => window.open(`https://native.org/app/credit-pool/?tab=markets`, '_blank')}
             className="px-3 py-1.5 text-sm rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50"
           >
             View Pool
           </button>
           <button 
-            onClick={() => window.open(`https://app.uniswap.org/add/${pairToken}`, '_blank')}
+            onClick={() => window.open(`https://native.org/app/credit-pool/?tab=markets`, '_blank')}
             className="px-3 py-1.5 text-sm rounded-lg bg-blue-500 text-white hover:bg-blue-600"
           >
             Add Liquidity
