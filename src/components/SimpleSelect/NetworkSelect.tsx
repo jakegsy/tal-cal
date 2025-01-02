@@ -13,21 +13,6 @@ const networks: NetworkOption[] = [
     id: 'ethereum',
     name: 'Ethereum',
     icon: 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/32/icon/eth.png',
-  },
-  {
-    id: 'polygon',
-    name: 'Polygon',
-    icon: 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/32/icon/matic.png',
-  },
-  {
-    id: 'arbitrum',
-    name: 'Arbitrum',
-    icon: 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/32/icon/arb.png',
-  },
-  {
-    id: 'optimism',
-    name: 'Optimism',
-    icon: 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/32/icon/op.png',
   }
 ];
 
