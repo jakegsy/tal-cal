@@ -1,6 +1,7 @@
 import { RecordCard } from './RecordCard';
 
 interface Record {
+  index: number;
   tokenName: string;
   network: string;
   amount: string;
@@ -9,6 +10,10 @@ interface Record {
   pairInfo?: string;
   address?: string;
   poolPairInfo?: string;
+  timeStamp?: Date;
+  removeRecord?: (key: number) => void;
+  tokenFullName?: string;
+  baseToken?: string;
 }
 
 interface RecordListProps {
@@ -16,6 +21,7 @@ interface RecordListProps {
 }
 
 export function RecordList({ records = [] }: RecordListProps) {
+  
   return (
     <div className="px-4 sm:px-6 lg:px-10">
       {records.length === 0 ? (
@@ -30,6 +36,7 @@ export function RecordList({ records = [] }: RecordListProps) {
           {records.map((record, index) => (
             <RecordCard
               key={index}
+              index={index}
               tokenName={record.tokenName}
               network={record.network}
               amount={record.amount}
@@ -38,6 +45,10 @@ export function RecordList({ records = [] }: RecordListProps) {
               pairInfo={record.pairInfo}
               address={record.address}
               poolPairInfo={record.poolPairInfo}
+              timeStamp={record.timeStamp}
+              removeRecord={record.removeRecord}
+              initTokenFullName={record.tokenFullName}
+              baseToken={record.baseToken}
             />
           ))}
         </div>

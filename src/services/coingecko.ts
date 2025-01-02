@@ -6,7 +6,7 @@ export class CoinGeckoService {
   private api: AxiosInstance;
 
   constructor() {
-    const apiKey = import.meta.env.VITE_COINGECKO_API_KEY;
+    const apiKey = import.meta.env?.VITE_COINGECKO_API_KEY || null;
     
     if (!apiKey) {
       console.warn('CoinGecko API key not found in environment variables');

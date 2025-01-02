@@ -1,6 +1,8 @@
 import { TokenInput } from './TokenInput';
 import { PoolInput } from './PoolInput';
 import { PairInput } from './PairInput';
+import { useState } from 'react';
+import { TokenInfo } from '../../services/ethereum';
 
 interface AddressInputSectionProps {
   baseToken: string;
@@ -21,8 +23,11 @@ export function AddressInputSection({
   onPairTokenChange,
   onPairInfoChange,
 }: AddressInputSectionProps) {
+  const [poolCoins, setPoolCoins] = useState<TokenInfo[]>([]);
   const isUniswapV3 = liquidityType === 'uniswap_v3';
   const isNativeLiquidity = liquidityType === 'native';
+
+  console.log('poolCoins:', poolCoins)
 
   return (
     <>
@@ -31,6 +36,7 @@ export function AddressInputSection({
         value={baseToken}
         onChange={onBaseTokenChange}
         isNativeLiquidity={isNativeLiquidity}
+        poolCoins={poolCoins}
       />
 
       <div className="relative">
@@ -40,6 +46,7 @@ export function AddressInputSection({
             value={pairToken}
             onChange={onPairTokenChange}
             onPairInfoChange={onPairInfoChange}
+            updatePoolCoins={setPoolCoins}
           />
         ) : isNativeLiquidity ? (
           <PairInput

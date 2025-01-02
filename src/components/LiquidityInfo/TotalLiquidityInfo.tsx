@@ -44,7 +44,7 @@ export function TotalLiquidityDisplay({
 
 
   const renderAdditionalInfo = () => {
-    console.log('look here:', liquidityType, poolAddress)
+    
 
     if (liquidityType === 'uniswap_v3' && poolAddress) {
       return <PoolInfoDisplay poolAddress={poolAddress} />;

@@ -13,6 +13,7 @@ import {
 import { TOKEN_DATABASE } from '../../constants/tokens';
 import { TotalLiquidityDisplay } from '../../components/LiquidityInfo/TotalLiquidityInfo';
 import { AddressInputSection } from '../../components/AddressInput/AddressInputSection';
+import { useTokenInfo } from '../../hooks/useTokenData';
 
 interface Record {
   tokenName: string;
@@ -23,12 +24,28 @@ interface Record {
   pairInfo?: string;
   address?: string;
   poolPairInfo?: string;
+  timeStamp?: Date;
+  removeRecord?: (key: number) => void;
+  tokenFullName?: string;
+  baseToken?: string;
 }
 
 export function Calculator() {
   const [network, setNetwork] = useState(DEFAULT_NETWORK);
   const [liquidityType, setLiquidityType] = useState(DEFAULT_LIQUIDITY_TYPE);
   const [baseToken, setBaseToken] = useState(DEFAULT_BASE_TOKEN);
+  const [baseSymbol, setBaseSymbol] = useState(null);
+  
+
+  // Update pairToken when liquidityType changes
+  useEffect(() => {
+    if (liquidityType === 'native') {
+      setPairToken('');  // Empty string for "Select all liquidity"
+    } else {
+      setPairToken(DEFAULT_POOL_ADDRESS);  // Reset to default pool for Uniswap
+    }
+  }, [liquidityType]);
+
   const [pairToken, setPairToken] = useState(
     DEFAULT_LIQUIDITY_TYPE === 'uniswap_v3' ? DEFAULT_POOL_ADDRESS : ''
   );
@@ -36,7 +53,9 @@ export function Calculator() {
   const [records, setRecords] = useState<Record[]>([]);
   const [poolPairInfo, setPoolPairInfo] = useState<string>('');
   const [liquidityValue, setLiquidityValue] = useState<string>('');
+  
 
+  const { data: tokenInfo } = useTokenInfo(baseToken);
   useEffect(() => {
     if (poolPairInfo && records.length > 0) {
       setRecords(prev => 
@@ -47,15 +66,21 @@ export function Calculator() {
         )
       );
     }
-  }, [poolPairInfo, pairToken]);
 
-  const getTokenSymbol = (address) => {
-    for (let tokens in TOKEN_DATABASE){
-      if (TOKEN_DATABASE[tokens].address === address)
-        return TOKEN_DATABASE[tokens].symbol
+    
+    for (let token in TOKEN_DATABASE) {
+      if (TOKEN_DATABASE[token].address.toLowerCase() === baseToken.toLowerCase()) {
+        setBaseSymbol(TOKEN_DATABASE[token].symbol);
+        return;
+      }
     }
-    return null
-  }
+    
+    if (tokenInfo) {
+      setBaseSymbol(tokenInfo.symbol);
+    }
+    
+  }, [poolPairInfo, pairToken, baseToken]);
+
   
   const addRecord = (liquidityValue: string) => {
     setLiquidityValue(liquidityValue);
@@ -64,19 +89,29 @@ export function Calculator() {
   const createRecord = () => {
     if (!liquidityValue) return;
     
+    
     const newRecord: Record = {
-      tokenName: getTokenSymbol(baseToken) || "WETH",
+      tokenName: baseSymbol || "WETH",
       network: network,
       amount: liquidityValue,
       liquidityType: liquidityType === 'uniswap_v3' ? 'Uniswap V3 AMM' : 'Native',
       priceRange: `${priceRange}`,
       pairInfo: pairToken ? `Paired with ${pairToken}` : undefined,
-      address: liquidityType === 'uniswap_v3' ? pairToken : undefined,
-      poolPairInfo: liquidityType === 'native' ? 'Native' : poolPairInfo || undefined
+      address: pairToken,
+      poolPairInfo: liquidityType === 'native' ? 'Native' : poolPairInfo || undefined,
+      timeStamp: new Date(),
+      removeRecord: (key: number) => {
+        setRecords(prev => prev.filter((_, index) => index !== key));
+      },
+      tokenFullName: tokenInfo?.name,
+      baseToken: baseToken
     };
     
-    setRecords(prev => [...prev, newRecord]);
+    setRecords(prev => [newRecord, ...prev]);
+    
   };
+
+  
 
   return (
     <div className="flex flex-col lg:flex-row w-full min-h-screen">
@@ -108,7 +143,7 @@ export function Calculator() {
             onPairTokenChange={setPairToken}
             onPairInfoChange={setPoolPairInfo}
           />
-       
+   
 
           
             <label className="text-sm font-medium text-gray-700">Price Range:</label>
@@ -129,17 +164,26 @@ export function Calculator() {
             />
           </div>
 
-          <button
-            onClick={createRecord}
-            disabled={!liquidityValue}
-            className={`w-full sm:w-auto px-4 md:px-6 py-2 md:py-2.5 rounded-lg text-white font-medium transition-colors duration-200 ${
-              liquidityValue 
-                ? 'bg-blue-500 hover:bg-blue-600 shadow-sm' 
-                : 'bg-gray-300 cursor-not-allowed'
-            }`}
-          >
-            Add to Records
-          </button>
+          <div className='flex flex-col sm:flex-row gap-4'>
+            <button
+              onClick={createRecord}
+              disabled={!liquidityValue}
+              className={`w-full sm:w-auto px-4 md:px-6 py-2 md:py-2.5 rounded-lg text-white font-medium transition-colors duration-200 ${
+                liquidityValue 
+                  ? 'bg-blue-500 hover:bg-blue-600 shadow-sm' 
+                  : 'bg-gray-300 cursor-not-allowed'
+              }`}
+            >
+              Add to Records
+            </button>
+            <button
+            className='w-full sm:w-auto px-4 md:px-6 py-2 md:py-2.5 rounded-lg text-white font-medium transition-colors duration-200 bg-red-500 hover:bg-red-100 shadow-sm'
+            onClick={() => {
+              setRecords([]);
+            }}>Clear All
+            </button>
+          </div>
+          
         </div>
       </div>
 

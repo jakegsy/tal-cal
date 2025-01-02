@@ -8,8 +8,6 @@ export interface TokenInfo {
   vaultAddress?: string;
 }
 
-
-
 export const TOKEN_DATABASE: { [key: string]: TokenInfo } = {
   USDC: {
     symbol: 'USDC',
@@ -54,9 +52,16 @@ export const TOKEN_DATABASE: { [key: string]: TokenInfo } = {
     icon: 'https://assets.coingecko.com/coins/images/33906/thumb/zircuit.png',
     decimals: 18,
     network: 'ethereum'
+  },
+  STONE: {
+    symbol: 'STONE',
+    name: 'StakeStone Ether',
+    address: '0x7122985656e38BDC0302Db86685bb972b145bD3C',
+    icon: 'https://assets.coingecko.com/coins/images/31891/thumb/stone.png',
+    decimals: 18,
+    network: 'ethereum'
   }
 };
-
 
 // Keep existing NATIVE_QUOTE_TOKENS for backward compatibility
 export const NATIVE_QUOTE_TOKENS = [

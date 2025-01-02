@@ -2,6 +2,7 @@ import { AddressInput } from './AddressInput';
 import { PoolPairInfo } from '../PoolPairInfo';
 import { useMemo } from 'react';
 import { useUniswapV3Pool } from '../../hooks/useUniswapV3Pool';
+import { TokenInfo } from '../../services/ethereum';
 
 const styles = {
   badge: 'text-sm font-medium text-gray-500'
@@ -29,15 +30,20 @@ const POPULAR_POOLS = [
     address: "0xCBCdF9626bC03E24f779434178A73a0B4bad62eD",
     label: "WBTC/ETH 0.3%",
   },
+  {
+    address: '0xf577068c05Fda48bA1729C9a190f78008c1f11A2',
+    label: "STONE/WETH"
+  }
 ];
 
-// value is the pairToken address
+// value is the pairToken address (the address of the token that represents the pair)
 interface PoolInputProps {
   value: string;
   onChange: (value: string) => void;
   label?: string;
   hideLabel?: boolean;
   onPairInfoChange?: (pairInfo: string) => void;
+  updatePoolCoins?: (coins: TokenInfo[]) => void;
 }
 
 export function PoolInput({
@@ -45,7 +51,8 @@ export function PoolInput({
   onChange,
   label = "Pool",
   hideLabel = false,
-  onPairInfoChange
+  onPairInfoChange,
+  updatePoolCoins
 }: PoolInputProps) {
   const { loading: poolLoading } = useUniswapV3Pool(value || undefined);
   const savedPools = useMemo(() => POPULAR_POOLS, []);
@@ -53,7 +60,10 @@ export function PoolInput({
   const badge = poolLoading 
     ? <span className={styles.badge}>Loading...</span>
     : value 
-      ? <PoolPairInfo poolAddress={value} onPairInfoChange={onPairInfoChange} />
+      ? <PoolPairInfo 
+      poolAddress={value} 
+      onPairInfoChange={onPairInfoChange}
+      updatePoolCoins={updatePoolCoins} />
       : null;
 
   return (

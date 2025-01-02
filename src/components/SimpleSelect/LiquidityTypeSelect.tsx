@@ -1,4 +1,5 @@
 import { ChevronDown } from 'lucide-react';
+import { useState } from 'react';
 
 interface LiquidityTypeSelectProps {
   value: string;
@@ -11,6 +12,9 @@ const liquidityTypes = [
 ];
 
 export function LiquidityTypeSelect({ value, onChange }: LiquidityTypeSelectProps) {
+
+  const [open, isOpen] = useState(false)
+  
   return (
     <div className="relative">
       <select

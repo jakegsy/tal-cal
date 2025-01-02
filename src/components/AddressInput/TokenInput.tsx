@@ -2,6 +2,8 @@ import { useTokenInfo } from '../../hooks/useTokenData';
 import { AddressInput } from './AddressInput';
 import { isValidEthereumAddress } from '../../utils/validation';
 import { useMemo } from 'react';
+import { X } from 'lucide-react';
+import { TokenInfo } from '../../services/ethereum';
 
 const styles = {
   badge: 'text-sm font-medium text-gray-500',
@@ -14,6 +16,7 @@ interface TokenInputProps {
   label?: string;
   isNativeLiquidity?: boolean;
   hideLabel?: boolean;
+  poolCoins?: TokenInfo[];
 }
 
 export function TokenInput({
@@ -21,7 +24,8 @@ export function TokenInput({
   onChange,
   label = "Token",
   isNativeLiquidity = false,
-  hideLabel = false
+  hideLabel = false,
+  poolCoins
 }: TokenInputProps) {
   const shouldFetchTokenInfo = value && isValidEthereumAddress(value);
   const { data: tokenInfo, isLoading } = useTokenInfo(shouldFetchTokenInfo ? value : undefined);
@@ -40,6 +44,10 @@ export function TokenInput({
       address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
       label: "USDC",
     },
+    {
+      address: "0x7122985656e38BDC0302Db86685bb972b145bD3C",
+      label: 'STONE'
+    }
     // Add more common tokens as needed
   ], []);
 
@@ -87,6 +95,8 @@ export function TokenInput({
       badge={badge}
       savedValues={savedTokens}
       isLoading={isLoading}
+      clearIcon={<X size={16} />}
+      poolCoins={poolCoins}
     />
   );
 }

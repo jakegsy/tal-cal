@@ -1,18 +1,22 @@
+import { TypedQueryDocumentNode } from 'graphql';
 import { useTokenInfo } from '../hooks/useTokenData';
 import { useUniswapV3Pool } from '../hooks/useUniswapV3Pool';
 import { useEffect } from 'react';
+import { TokenInfo } from '../services/ethereum';
+
 
 interface PoolPairInfoProps {
   poolAddress: string;
   onPairInfoChange?: (pairInfo: string) => void;
   onDebugInfo?: (info: string) => void;
+  updatePoolCoins?: (poolCoins: TokenInfo[]) => void;
 }
 
 function formatFeePercent(feeTier: string): string {
   return `${(Number(feeTier) / 10000).toFixed(3)}%`;
 }
 
-export function PoolPairInfo({ poolAddress, onPairInfoChange, onDebugInfo }: PoolPairInfoProps) {
+export function PoolPairInfo({ poolAddress, onPairInfoChange, onDebugInfo, updatePoolCoins }: PoolPairInfoProps) {
   const { poolInfo, loading: poolLoading } = useUniswapV3Pool(poolAddress);
   const { data: token0Info, isLoading: token0Loading } = useTokenInfo(poolInfo?.token0?.id);
   const { data: token1Info, isLoading: token1Loading } = useTokenInfo(poolInfo?.token1?.id);
@@ -26,6 +30,11 @@ export function PoolPairInfo({ poolAddress, onPairInfoChange, onDebugInfo }: Poo
       if (onDebugInfo) {
         onDebugInfo(`Pool Info: ${JSON.stringify(poolInfo)} Token 0 Info: ${JSON.stringify(token0Info)} Token 1 Info: ${JSON.stringify(token1Info)}`);
       }
+      if (token0Info && token1Info) {
+        const poolCoins = [token0Info, token1Info];
+        updatePoolCoins(poolCoins)
+      }
+      
     }
   }, [isLoading, poolInfo, token0Info, token1Info, onPairInfoChange, onDebugInfo]);
 
