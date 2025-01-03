@@ -1,5 +1,6 @@
 import { ethers } from 'ethers';
 import { ERC20_ABI } from '../contracts/erc20';
+import { TOKEN_DATABASE } from '../constants/tokens';
 
 const DEFAULT_RPC_URL = 'https://eth.llamarpc.com';
 
@@ -36,6 +37,9 @@ class EthereumService {
     try {
       // Try to get icon from Trust Wallet CDN
       const checksumAddress = ethers.getAddress(address);
+      const localTokenInfo = Object.values(TOKEN_DATABASE).filter((token) => 
+        token.address.toLowerCase() === checksumAddress.toLowerCase())[0];
+      if(localTokenInfo) return localTokenInfo.icon;
       return `https://assets-cdn.trustwallet.com/blockchains/ethereum/assets/${checksumAddress}/logo.png`;
     } catch {
       return undefined;
