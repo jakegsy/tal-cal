@@ -89,7 +89,7 @@ export function PoolInfoDisplay({ poolAddress }: PoolInfoDisplayProps) {
       
       <button 
         className="mt-6 px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-        onClick={() => window.open(`https://info.uniswap.org/#/pools/${poolAddress}`, '_blank')}
+        onClick={() => window.open(`https://app.uniswap.org/explore/pools/ethereum/${poolAddress}`, '_blank')}
       >
         View Pool
       </button>
