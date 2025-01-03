@@ -37,8 +37,8 @@ class EthereumService {
     try {
       // Try to get icon from Trust Wallet CDN
       const checksumAddress = ethers.getAddress(address);
-      const localTokenInfo = Object.values(TOKEN_DATABASE).filter((token) => 
-        token.address.toLowerCase() === checksumAddress.toLowerCase())[0];
+      const localTokenInfo = Object.values(TOKEN_DATABASE).find((token) => 
+        token.address.toLowerCase() === checksumAddress.toLowerCase());
       if(localTokenInfo) return localTokenInfo.icon;
       return `https://assets-cdn.trustwallet.com/blockchains/ethereum/assets/${checksumAddress}/logo.png`;
     } catch {

@@ -41,3 +41,9 @@ export function useTokenBalance(tokenAddress: string | undefined, holderAddress:
     enabled: !!tokenAddress && !!holderAddress,
   });
 }
+
+export function useTokenData(tokenId: string | undefined, poolAddress: string) {
+  const { data: balance, isLoading: balanceLoading } = useTokenBalance(tokenId || '', poolAddress);
+  const { data: price, isLoading: priceLoading } = useTokenPrice(tokenId || '');
+  return { balance, price, isLoading: balanceLoading || priceLoading };
+}
