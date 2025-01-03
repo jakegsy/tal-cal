@@ -80,7 +80,7 @@ export function RecordCard({
     if (address)
       window.open(`https://etherscan.io/address/${address}`, '_blank');
     else
-      window.open('https://app.uniswap.org/pools/ethereum/${address}', '_blank');
+      window.open(`https://app.uniswap.org/explore/pools/ethereum/${address}`, '_blank');
   }
 
   const handleAddLiquidity = () => {

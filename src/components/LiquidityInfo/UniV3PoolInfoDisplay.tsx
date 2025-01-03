@@ -1,28 +1,13 @@
 import { useMemo } from 'react';
-import { useTokenBalance, useTokenPrice } from '../../hooks/useTokenData';
+import { useTokenData } from '../../hooks/useTokenData';
 import { useUniswapV3Pool } from '../../hooks/useUniswapV3Pool';
-import { formatCurrency } from '../../utils/format';
-import { ExternalLink } from 'lucide-react';
+import { formatCurrency, formatTokenAmount } from '../../utils/format';
 
-function formatTokenAmount(amount: number | null): string {
-  if (amount === null) return '';
-  return new Intl.NumberFormat('en-US', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(amount);
-}
-
-function useTokenData(tokenId: string | undefined, poolAddress: string) {
-  const { data: balance, isLoading: balanceLoading } = useTokenBalance(tokenId || '', poolAddress);
-  const { data: price, isLoading: priceLoading } = useTokenPrice(tokenId || '');
-  return { balance, price, isLoading: balanceLoading || priceLoading };
-}
-
-interface PoolInfoDisplayProps {
+interface UniV3PoolInfoDisplayProps {
   poolAddress: string;
 }
 
-export function PoolInfoDisplay({ poolAddress }: PoolInfoDisplayProps) {
+export function UniV3PoolInfoDisplay({ poolAddress }: UniV3PoolInfoDisplayProps) {
   const { poolInfo, loading: poolLoading, error: poolError } = useUniswapV3Pool(poolAddress);
   const token0Data = useTokenData(poolInfo?.token0?.id, poolAddress);
   const token1Data = useTokenData(poolInfo?.token1?.id, poolAddress);
@@ -89,7 +74,7 @@ export function PoolInfoDisplay({ poolAddress }: PoolInfoDisplayProps) {
       
       <button 
         className="mt-6 px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-        onClick={() => window.open(`https://info.uniswap.org/#/pools/${poolAddress}`, '_blank')}
+        onClick={() => window.open(`https://app.uniswap.org/explore/pools/ethereum/${poolAddress}`, '_blank')}
       >
         View Pool
       </button>

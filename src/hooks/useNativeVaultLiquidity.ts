@@ -17,6 +17,7 @@ interface AllVaultsLiquidityResult {
   loading: boolean;
   errors: Error[] | undefined;
   refetchAll: () => Promise<void>;
+  vaultResults: (VaultLiquidityResult & { address: string })[];
 }
 
 /**
@@ -80,9 +81,13 @@ export function useVaultLiquidity(vaultAddress?: string): VaultLiquidityResult {
  * @returns Object containing total cash, loading state, and array of errors if any
  */
 export function useAllNativeVaultsLiquidity(): AllVaultsLiquidityResult {
-  const vaultResults = NATIVE_QUOTE_TOKENS.map(token => 
-    useVaultLiquidity(token.vaultAddress)
-  );
+  const vaultResults = NATIVE_QUOTE_TOKENS.map(token => {
+    const vaultResult = useVaultLiquidity(token.vaultAddress);
+    return {
+      ...vaultResult,
+      address: token.address,
+    };
+  });
 
   const result = useMemo(() => {
     const isLoading = vaultResults.some(result => result.loading);
@@ -108,7 +113,8 @@ export function useAllNativeVaultsLiquidity(): AllVaultsLiquidityResult {
       totalCashInUSD,
       loading: isLoading,
       errors: errors.length > 0 ? errors : undefined,
-      refetchAll
+      refetchAll,
+      vaultResults,
     };
   }, [vaultResults]);
 

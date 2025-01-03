@@ -1,6 +1,7 @@
 import { UniswapV3LiquidityDisplay } from '../LiquidityInfo/UniswapV3LiquidityInfo';
 import { SingleVaultInfo, TotalVaultInfo } from '../LiquidityInfo/NativeVaultLiquidityInfo';
-import { PoolInfoDisplay } from './PoolInfoDisplay';
+import { UniV3PoolInfoDisplay } from './UniV3PoolInfoDisplay';
+import { NativeVaultPoolInfoDisplay } from './NativeVaultPoolInfoDisplay';
 import { useEffect } from 'react';
 
 interface TotalLiquidityDisplayProps {
@@ -47,24 +48,13 @@ export function TotalLiquidityDisplay({
     
 
     if (liquidityType === 'uniswap_v3' && poolAddress) {
-      return <PoolInfoDisplay poolAddress={poolAddress} />;
+      return <UniV3PoolInfoDisplay poolAddress={poolAddress} />;
     }
     if (liquidityType !== 'uniswap_v3' && pairToken) {
       return (
-        <div className="flex gap-2">
-          <button 
-            onClick={() => window.open(`https://native.org/app/credit-pool/?tab=markets`, '_blank')}
-            className="px-3 py-1.5 text-sm rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50"
-          >
-            View Pool
-          </button>
-          <button 
-            onClick={() => window.open(`https://native.org/app/credit-pool/?tab=markets`, '_blank')}
-            className="px-3 py-1.5 text-sm rounded-lg bg-blue-500 text-white hover:bg-blue-600"
-          >
-            Add Liquidity
-          </button>
-        </div>
+        <NativeVaultPoolInfoDisplay
+          baseToken={baseToken} 
+          pairToken={pairToken} />
       );
     }
     return null;

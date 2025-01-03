@@ -57,7 +57,7 @@ export const TOKEN_DATABASE: { [key: string]: TokenInfo } = {
     symbol: 'STONE',
     name: 'StakeStone Ether',
     address: '0x7122985656e38BDC0302Db86685bb972b145bD3C',
-    icon: 'https://assets.coingecko.com/coins/images/31891/thumb/stone.png',
+    icon: 'https://coin-images.coingecko.com/coins/images/33103/small/200_200.png',
     decimals: 18,
     network: 'ethereum'
   }
