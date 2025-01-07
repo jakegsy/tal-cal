@@ -188,7 +188,20 @@ export function Calculator() {
       </div>
 
       <div className="w-full lg:w-[35%] border-t lg:border-t-0 lg:border-l border-gray-200 p-4 md:p-6 lg:p-8 bg-white">
-        <h2 className="text-xl font-semibold mb-4 md:mb-6">Records</h2>
+        <div className="w-full flex justify-between mb-4 md:mb-6">
+          <h2 className="text-xl font-semibold">Records</h2>
+          {
+            records.length > 0 && (
+              <button 
+                className="px-3 py-1 hover:bg-gray-100 rounded-[0.5rem] border bg-white shadow-[0px_1px_3px_0px_rgba(0,0,0,0.06)] text-[0.9rem] font-[500] text-black"
+                onClick={() => {
+                  setRecords([]);
+                }}>
+                  Clear All
+              </button>
+            )
+          }
+        </div>
         <RecordList records={records}/>
       </div>
     </div>
