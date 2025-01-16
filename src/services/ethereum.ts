@@ -2,7 +2,7 @@ import { ethers } from 'ethers';
 import { ERC20_ABI } from '../contracts/erc20';
 import { TOKEN_DATABASE } from '../constants/tokens';
 
-const DEFAULT_RPC_URL = 'https://eth.llamarpc.com';
+const DEFAULT_RPC_URL = 'https://ethereum.publicnode.com';
 
 export interface TokenInfo {
   address: string;
@@ -17,7 +17,8 @@ class EthereumService {
   private tokenCache: Map<string, { data: TokenInfo; timestamp: number }>;
 
   constructor() {
-    const rpcUrl = import.meta.env.VITE_ETHEREUM_RPC_URL || DEFAULT_RPC_URL;
+    // const rpcUrl = import.meta.env.VITE_ETHEREUM_RPC_URL || DEFAULT_RPC_URL;
+    const rpcUrl = DEFAULT_RPC_URL; // TODO: uncomment the above line and remove this line
     this.provider = new ethers.JsonRpcProvider(DEFAULT_RPC_URL);
     this.tokenCache = new Map();
     console.log(`Ethereum service initialized with RPC URL: ${rpcUrl}`);
