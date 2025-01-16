@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { TOKEN_DATABASE, NATIVE_QUOTE_TOKENS } from '../../constants/tokens';
 import { Circle, ExternalLink, X } from 'lucide-react';
 import { VaultLiquidityInfo } from '../LiquidityInfo/NativeVaultLiquidityInfo';
@@ -83,12 +83,10 @@ export function RecordCard({
       window.open(`https://app.uniswap.org/explore/pools/ethereum/${address}`, '_blank');
   }
 
-  const handleAddLiquidity = () => {
-    window.open('https://app.uniswap.org/pools/add', '_blank');  
+  const handleAddLiquidity = useCallback(() => {
+    window.open(isNative ? 'https://native.org/app/credit-pool' : 'https://app.uniswap.org/pools/add', '_blank');  
 
-
-
-  };
+  }, [isNative]);
 
   const explorerUrl = `https://etherscan.io/token/${tokenIcon}`;
 
