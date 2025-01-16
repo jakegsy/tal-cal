@@ -117,9 +117,6 @@ export function RecordCard({
   return (
     <div className="relative bg-white rounded-lg border border-gray-200 p-3 md:p-4 w-full sm:min-w-[400px]">
       <div className='flex items-center gap-2 absolute top-2 right-2'>
-        <div className='border rounded-lg px-2 text-blue-500 bg-blue-100'>
-          { liquidityType }
-        </div>
         <button 
           className='flex items-center justify-center w-8 h-8 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors duration-200'
           onClick={() => removeRecord(index)}
@@ -179,6 +176,9 @@ export function RecordCard({
               ) : null}
             </div>
           )}
+          <div className='inline-block border rounded-lg px-2 text-blue-500 bg-blue-100 mt-2'>
+            { liquidityType }
+          </div>
           <div className='text-sm text-gray-500 mt-2'>
             { createNewTimeStamp(timeStamp)}
           </div>

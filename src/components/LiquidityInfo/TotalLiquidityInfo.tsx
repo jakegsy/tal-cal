@@ -62,7 +62,7 @@ export function TotalLiquidityDisplay({
 
   return (
     <div className="space-y-2">
-      <h2 className="text-2xl font-bold inline-flex items-baseline gap-2">
+      <h2 className="text-1xl md:text-2xl font-bold inline-flex items-baseline gap-2">
         <span>Total Available Liquidity:</span>
         <span>{renderLiquidityValue()}</span>
       </h2>

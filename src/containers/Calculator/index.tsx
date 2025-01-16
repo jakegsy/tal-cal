@@ -185,15 +185,10 @@ export function Calculator() {
           </div>
           
           <div className='flex items-center !mt-7 pt-6 border-t border-gray-200'>
-            <p className="text-gray-600 mr-2">Build with:</p>
+            <p className="text-gray-600 mr-3">Build with:</p>
             <div className='flex'>
               {
                 [
-                  {
-                    name: 'Re7 Labs',
-                    link: 'https://x.com/Re7Capital',
-                    logo: 'https://pbs.twimg.com/profile_images/1797290406331236354/PfBXtgkU_400x400.jpg'
-                  },
                   {
                     name: 'Morpho Labs',
                     link: 'https://x.com/MorphoLabs',
@@ -208,7 +203,12 @@ export function Calculator() {
                     name: 'Chaos Labs',
                     link: 'https://x.com/chaos_labs',
                     logo: 'https://pbs.twimg.com/profile_images/1832069994298880000/16YZ4iOi_400x400.png'
-                  }
+                  },
+                  {
+                    name: 'Re7 Labs',
+                    link: 'https://x.com/Re7Capital',
+                    logo: 'https://pbs.twimg.com/profile_images/1797290406331236354/PfBXtgkU_400x400.jpg'
+                  },
                 ].map((item) => (
                   <a className='cursor-pointer mr-4' href={item.link} target='_blank' rel='noreferrer'>
                     <img className='grayscale hover:grayscale-0 transition duration-300' width={32} src={item.logo} alt={item.name} />
